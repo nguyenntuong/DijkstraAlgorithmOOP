@@ -58,7 +58,7 @@ namespace FixedRouteTable
         {
             for (int i = 1; i < Path.Count; i++)
             {
-                Cost += Path[i - 1].DirectedRouters[Path[i]];
+                Cost += Path[i - 1].DirectedRoutersWithCost[Path[i]];
             }
             return Cost;
         }

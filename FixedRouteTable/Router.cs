@@ -11,11 +11,12 @@ namespace FixedRouteTable
     public class Router
     {
         /// <summary>
+        /// Danh sách các Router kết nối trực tiếp kết hợp với phí kết nối (Cost)
         /// Chỉ sử dụng phí cổng ra
         /// </summary>
-        private readonly Dictionary<Router, int> _directedRouters = new Dictionary<Router, int>();
+        private readonly Dictionary<Router, int> _directedRoutersWithCost = new Dictionary<Router, int>();
 
-        public Dictionary<Router, int> DirectedRouters => _directedRouters;
+        public Dictionary<Router, int> DirectedRoutersWithCost => _directedRoutersWithCost;
 
         /// <summary>
         /// ID of Router
@@ -53,9 +54,9 @@ namespace FixedRouteTable
         /// <returns></returns>
         public bool RelativeNode(Router directedNode, int cost)
         {
-            if (DirectedRouters.ContainsKey(directedNode))
+            if (DirectedRoutersWithCost.ContainsKey(directedNode))
                 return false;
-            DirectedRouters.Add(directedNode, cost);
+            DirectedRoutersWithCost.Add(directedNode, cost);
             return true;
         }
 
@@ -84,7 +85,7 @@ namespace FixedRouteTable
             if (path.Exists(o => o.Equals(this)))
                 return;
             path.Add(this);
-            if (DirectedRouters.ContainsKey(destinationNode))
+            if (DirectedRoutersWithCost.ContainsKey(destinationNode))
             {
                 path.Add(destinationNode);
                 allPath.Add(RoutePath.CreatePath(path));
@@ -92,7 +93,7 @@ namespace FixedRouteTable
             }
             else
             {
-                foreach (KeyValuePair<Router, int> item in DirectedRouters
+                foreach (KeyValuePair<Router, int> item in DirectedRoutersWithCost
                     .Where(o => o.Key != sourceNode
                     || !path.Exists(po => po == o.Key)
                     ))
@@ -125,9 +126,9 @@ namespace FixedRouteTable
         }
         public override string ToString()
         {
-            string present = $"Router: {HostID} - DirectedNode: {DirectedRouters.Count} => {{";
+            string present = $"Router: {HostID} - DirectedNode: {DirectedRoutersWithCost.Count} => {{";
 
-            foreach (KeyValuePair<Router, int> item in DirectedRouters)
+            foreach (KeyValuePair<Router, int> item in DirectedRoutersWithCost)
             {
                 present += " " + item.Key.HostID.ToString();
             }

@@ -243,7 +243,7 @@ namespace FixedRouteTable
                         .Items
                         .Add($"Nguồn: {path.Path[i - 1].HostID} " +
                         $"-> Đích: {path.Path[i].HostID} " +
-                        $"| Cost: {path.Path[i - 1].DirectedRouters[path.Path[i]]}");
+                        $"| Cost: {path.Path[i - 1].DirectedRoutersWithCost[path.Path[i]]}");
                 }
                 string mode = radioButton1.Checked ? "Router đi qua" : "Phí";
                 string discription = radioButton1.Checked ? " (Không tính nguồn)" : "";
@@ -297,9 +297,9 @@ namespace FixedRouteTable
             KeyValuePair<int, Router> centerRouter = Topology
                 .AllNode
                 .Where(
-                o => o.Value.DirectedRouters.Count
+                o => o.Value.DirectedRoutersWithCost.Count
                 ==
-                Topology.AllNode.Max(mo => mo.Value.DirectedRouters.Count))
+                Topology.AllNode.Max(mo => mo.Value.DirectedRoutersWithCost.Count))
                 .First();
             int firstLeftX = panelBackground.Size.Width / 3;
 
@@ -365,7 +365,7 @@ namespace FixedRouteTable
             foreach (RouterControlUI item in panelBackground.Controls)
             {
 
-                foreach (KeyValuePair<Router, int> directedRouter in item.Self.DirectedRouters)
+                foreach (KeyValuePair<Router, int> directedRouter in item.Self.DirectedRoutersWithCost)
                 {
                     RouterControlUI ctrUI = panelBackground
                         .Controls
@@ -385,9 +385,9 @@ namespace FixedRouteTable
         /// <param name="current">Node hiện tại</param>
         void DrawDrectedRouter(Point moc, Router current)
         {
-            int degreePernodeLink = 360 / current.DirectedRouters.Count;
+            int degreePernodeLink = 360 / current.DirectedRoutersWithCost.Count;
             int distantDefault = 200;
-            Dictionary<Router, int> DiretedRouters = current.DirectedRouters;
+            Dictionary<Router, int> DiretedRouters = current.DirectedRoutersWithCost;
             for (int j = 0; j < DiretedRouters.Count; j++)
             {
                 Router DirectedRouter = DiretedRouters.ElementAt(j).Key;
