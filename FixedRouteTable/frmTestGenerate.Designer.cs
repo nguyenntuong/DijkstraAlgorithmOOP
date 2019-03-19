@@ -134,7 +134,7 @@
             this.Name = "frmTestGenerate";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Test Data Generate";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmTestGenerate_FormClosed);
             this.Load += new System.EventHandler(this.frmTestGenerate_Load);

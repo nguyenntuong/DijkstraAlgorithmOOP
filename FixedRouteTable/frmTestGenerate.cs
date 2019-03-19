@@ -31,7 +31,11 @@ namespace FixedRouteTable
                 topo_size = int.Parse(textBox1.Text);
                 if (topo_size > 17)
                 {
-                    MessageBox.Show("Tối đa 17 node");
+                    if(MessageBox.Show("Tối đa 17 node, hơn 17 node có thể stress CPU của bạn, khá là nặng !"
+                        ,"Cảnh báo !",MessageBoxButtons.OKCancel,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button2)==DialogResult.Cancel)
+                    return;
+                    MessageBox.Show("Nói rồi đứng máy đấy, chỉnh lại đi !"
+                        , "Cảnh báo lần 2 !", MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1);
                     return;
                 }
                 if(topo_size<2)
