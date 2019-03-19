@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FixedRouteTable
@@ -57,20 +58,46 @@ namespace FixedRouteTable
 
             TopoSet += new EventHandler((o, a) =>
             {
-                if (Topology == null)
+                if (InvokeRequired)
                 {
-                    gBFunction.Enabled = false;
+                    EndInvoke(BeginInvoke(new MethodInvoker(
+                        () =>
+                        {
+                            if (Topology == null)
+                            {
+                                gBFunction.Enabled = false;
+                            }
+                            else
+                            {
+                                gBFunction.Enabled = true;
+                                if (Topology.Equals(o))
+                                {
+                                    NeedToReDraw = false;
+                                }
+                                else
+                                {
+                                    NeedToReDraw = true;
+                                }
+                            }
+                        })));
                 }
                 else
                 {
-                    gBFunction.Enabled = true;
-                    if (Topology.Equals(o))
+                    if (Topology == null)
                     {
-                        NeedToReDraw = false;
+                        gBFunction.Enabled = false;
                     }
                     else
                     {
-                        NeedToReDraw = true;
+                        gBFunction.Enabled = true;
+                        if (Topology.Equals(o))
+                        {
+                            NeedToReDraw = false;
+                        }
+                        else
+                        {
+                            NeedToReDraw = true;
+                        }
                     }
                 }
             });
@@ -85,6 +112,7 @@ namespace FixedRouteTable
 
         private void button1_Click(object sender, EventArgs e)
         {
+            UseWaitCursor = true;
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.InitialDirectory = Application.StartupPath;
             openFile.Filter = "Text File|*.txt";
@@ -92,38 +120,82 @@ namespace FixedRouteTable
             if (openFile.ShowDialog() != DialogResult.OK)
                 return;
             textBox1.Text = openFile.FileName;
-            ReadInputFile(openFile.FileName);
+            Task.Run(() =>
+            {
+                ReadInputFile(openFile.FileName);
+                if (InvokeRequired)
+                {
+                    UseWaitCursor = false;
+                }
+                else
+                {
+                    UseWaitCursor = false;
+                }
+            });
         }
 
         private void ReadInputFile(string path)
         {
+            if (InvokeRequired)
+            {
+                EndInvoke(BeginInvoke(new MethodInvoker(
+                    () =>
+                    {
+                        ClearUI();
+                    })));
+            }
+            else
+            {
+                ClearUI();
+            }
             StreamReader file = new StreamReader(path);
 #if !DEBUG
             try
             {
 #endif
-            int topo_size = int.Parse(file.ReadLine());
-            Topology = Topology.CreateTopology(topo_size);
-            string line;
-            while (!(line = file.ReadLine()).Equals("0"))
-            {
-                int[] args = line.Split(' ').Select(o => int.Parse(o)).ToArray();
-                if (args[2] <= 0)
-                    continue;
-                Topology.AddRelative(from: args[0], to: args[1], cost: args[2]);
-            }
-            ClearUI();
-            InitUI();
+                int topo_size = int.Parse(file.ReadLine());
+                Topology = Topology.CreateTopology(topo_size);
+                string line;
+                while (!(line = file.ReadLine()).Equals("0"))
+                {
+                    int[] args = line.Split(' ').Select(o => int.Parse(o)).ToArray();
+                    if (args[2] <= 0)
+                        continue;
+                    Topology.AddRelative(from: args[0], to: args[1], cost: args[2]);
+                }
+                if (InvokeRequired)
+                {
+                    EndInvoke(BeginInvoke(new MethodInvoker(
+                        () =>
+                        {
+                            InitUI();
+                        })));
+                }
+                else
+                {
+                    InitUI();
+                }
 #if !DEBUG
             }
             catch
             {
-                MessageBox.Show("File not support !");
+                if (InvokeRequired)
+                {
+                    EndInvoke(BeginInvoke(new MethodInvoker(
+                        () =>
+                        {
+                            MessageBox.Show("File not support !");
+                        })));
+                }
+                else
+                {
+                    MessageBox.Show("File not support !");
+                }
             }
             finally
             {
 #endif
-            file.Close();
+                file.Close();
 #if !DEBUG
             }
 #endif
@@ -202,9 +274,11 @@ namespace FixedRouteTable
         {
             if (radioButton1.Checked)
             {
+                UseWaitCursor = true;
                 routeMetrix = Topology.MetrixCaculate(Topology.Mode.MinimumHop);
                 DrawGrid();
                 btnFind_Click(null, null);
+                UseWaitCursor = false;
             }
         }
 
@@ -212,9 +286,11 @@ namespace FixedRouteTable
         {
             if (radioButton2.Checked)
             {
+                UseWaitCursor = true;
                 routeMetrix = Topology.MetrixCaculate();
                 DrawGrid();
                 btnFind_Click(null, null);
+                UseWaitCursor = false;
             }
         }
 
@@ -329,14 +405,16 @@ namespace FixedRouteTable
             IEnumerable<Control> controls = panelBackground
                 .Controls
                 .Cast<Control>();
-            int overlap =
+            int overlapTop =
                 controls.Min(mo => mo.Location.Y);
+            int overlapLeft =
+                controls.Min(mo => mo.Location.X);
             foreach (Control control in panelBackground.Controls)
             {
                 control.Location = new Point(
-                    control.Location.X
+                    control.Location.X+ Math.Abs(overlapLeft<0?overlapLeft:0)
                     ,
-                    control.Location.Y + Math.Abs(overlap)
+                    control.Location.Y + Math.Abs(overlapTop<0?overlapTop:0)
                     );
             }
         }
@@ -496,8 +574,22 @@ namespace FixedRouteTable
 
         private void frm_Main_Load(object sender, EventArgs e)
         {
-
+            panelBackground.MouseWheel += PanelBackground_MouseWheel;
         }
 
+        private void PanelBackground_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (panelBackground.Controls.Count != 0)
+            {
+                DrawLink();
+            }
+        }
+
+        private void GenerateDataTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form frmTestGenerate = new frmTestGenerate();
+            frmTestGenerate.Owner = this;
+            frmTestGenerate.Show();
+        }
     }
 }

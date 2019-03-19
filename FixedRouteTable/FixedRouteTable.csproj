@@ -54,6 +54,12 @@
     <Compile Include="frmRouteTable.Designer.cs">
       <DependentUpon>frmRouteTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmTestGenerate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmTestGenerate.Designer.cs">
+      <DependentUpon>frmTestGenerate.cs</DependentUpon>
+    </Compile>
     <Compile Include="frm_Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,6 +80,9 @@
     <Compile Include="Topology.cs" />
     <EmbeddedResource Include="frmRouteTable.resx">
       <DependentUpon>frmRouteTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmTestGenerate.resx">
+      <DependentUpon>frmTestGenerate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frm_Main.resx">
       <DependentUpon>frm_Main.cs</DependentUpon>
