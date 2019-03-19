@@ -29,9 +29,9 @@ namespace FixedRouteTable
             try
             {
                 topo_size = int.Parse(textBox1.Text);
-                if (topo_size > 17)
+                if (topo_size > 100)
                 {
-                    if(MessageBox.Show("Tối đa 17 node, hơn 17 node có thể stress CPU của bạn, khá là nặng !"
+                    if(MessageBox.Show("Tối đa 100 node, hơn 100 node có thể stress CPU của bạn, khá là nặng !"
                         ,"Cảnh báo !",MessageBoxButtons.OKCancel,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button2)==DialogResult.Cancel)
                     return;
                     MessageBox.Show("Nói rồi đứng máy đấy, chỉnh lại đi !"

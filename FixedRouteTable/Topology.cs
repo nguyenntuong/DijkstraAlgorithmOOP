@@ -3,6 +3,7 @@
  * Date: 16-3
  * Modifer-Date: 18-3
  * */
+using System;
 using System.Collections.Generic;
 
 namespace FixedRouteTable
@@ -116,7 +117,7 @@ namespace FixedRouteTable
                         listPath.GetLeastCostPath().NextHop().HostID
                         :
                         listPath.GetMinimunHopPath().NextHop().HostID;
-                    _routeTable.Add(AllNode[y_transform], AllNode[metrix[x, y]]);
+                    _routeTable.Add(AllNode[y_transform], AllNode[metrix[x, y]]);                    
                 }
                 AllNode[x + 1].ImportRouteTable(_routeTable);
             }

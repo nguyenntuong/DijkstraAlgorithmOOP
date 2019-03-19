@@ -120,7 +120,7 @@ namespace FixedRouteTable
             if (openFile.ShowDialog() != DialogResult.OK)
                 return;
             textBox1.Text = openFile.FileName;
-            Task.Run(() =>
+            Task.Factory.StartNew(() =>
             {
                 ReadInputFile(openFile.FileName);
                 if (InvokeRequired)
@@ -131,7 +131,7 @@ namespace FixedRouteTable
                 {
                     UseWaitCursor = false;
                 }
-            });
+            },TaskCreationOptions.LongRunning);
         }
 
         private void ReadInputFile(string path)
@@ -307,10 +307,22 @@ namespace FixedRouteTable
             {
                 path = Topology[from].GetRoutePathFromRoutingTable(Topology[to]);
                 if (path.IsNotValid)
-                {
-                    lstResult
-                           .Items
-                           .Add($"Không có tuyến đường nào từ {from} =>  {to}.");
+                {                    
+                    if (path.IsMoreThan1000Path)
+                    {
+                        lstResult
+                                 .Items
+                                 .Add($"Số lượng Router trung gian từ {from} =>  {to} quá lớn (Hơn 1000 Router).");
+                        lstResult
+                                 .Items
+                                 .Add($"Có thể xuất ra file nhưng không thể tính toán (giới hạn RAM)");
+                    }
+                    else
+                    {
+                        lstResult
+                              .Items
+                              .Add($"Không có tuyến đường nào từ {from} =>  {to}.");
+                    }
                     return;
                 }
                 for (int i = 1; i < path.Path.Count; i++)
