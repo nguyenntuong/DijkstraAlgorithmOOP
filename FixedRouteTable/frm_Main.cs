@@ -103,7 +103,7 @@ namespace FixedRouteTable
             {
 #endif
             int topo_size = int.Parse(file.ReadLine());
-            Topology = new Topology(topo_size);
+            Topology = Topology.CreateTopology(topo_size);
             string line;
             while (!(line = file.ReadLine()).Equals("0"))
             {

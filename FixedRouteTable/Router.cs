@@ -71,11 +71,11 @@ namespace FixedRouteTable
         /// Tìm tất tuyến đường từ chính Router này đến một Router khác trong 
         /// Topology chứa nó
         /// </summary>
-        /// <param name="allPath">Chứa tất cả các tuyến đường có thể đi</param>
+        /// <param name="allPathStorage">Chứa tất cả các tuyến đường có thể đi</param>
         /// <param name="destinationNode">Đích đến</param>
         /// <param name="sourceNode">Nguồn</param>
         /// <param name="path">Đánh dấu đường đi</param>
-        public void PathToFromTopology(ref ListOfRoutePath allPath
+        public void PathToFromTopology(ref ListOfRoutePath allPathStorage
             , Router destinationNode
             , Router sourceNode = null
             , List<Router> path = null)
@@ -88,7 +88,7 @@ namespace FixedRouteTable
             if (DirectedRoutersWithCost.ContainsKey(destinationNode))
             {
                 path.Add(destinationNode);
-                allPath.Add(RoutePath.CreatePath(path));
+                allPathStorage.Add(RoutePath.CreatePath(path));
                 return;
             }
             else
@@ -98,7 +98,7 @@ namespace FixedRouteTable
                     || !path.Exists(po => po == o.Key)
                     ))
                 {
-                    item.Key.PathToFromTopology(allPath: ref allPath
+                    item.Key.PathToFromTopology(allPathStorage: ref allPathStorage
                         , destinationNode: destinationNode
                         , sourceNode: this
                         , path: path);

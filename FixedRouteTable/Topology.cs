@@ -10,6 +10,16 @@ namespace FixedRouteTable
     public class Topology
     {
         /// <summary>
+        /// Get instance
+        /// </summary>
+        /// <param name="topo_size"></param>
+        /// <returns></returns>
+        public static Topology CreateTopology(int topo_size)
+        {
+            return new Topology(topo_size);
+        }
+
+        /// <summary>
         /// Chế độ tìm đường
         /// </summary>
         public enum Mode
@@ -39,7 +49,8 @@ namespace FixedRouteTable
             get => allNode;
             set => allNode = value;
         }
-        public Topology(int topo_size)
+
+        private Topology(int topo_size)
         {
             TopologySize = topo_size;
             CreateAllNode(topo_size);
@@ -68,8 +79,8 @@ namespace FixedRouteTable
 
         public ListOfRoutePath RoutePath(int from, int to)
         {
-            ListOfRoutePath allPath = ListOfRoutePath.CreateCacheListPath();
-            AllNode[from].PathToFromTopology(allPath: ref allPath
+            ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage();
+            AllNode[from].PathToFromTopology(allPathStorage: ref allPath
                 , destinationNode: AllNode[to]);
             return allPath;
         }

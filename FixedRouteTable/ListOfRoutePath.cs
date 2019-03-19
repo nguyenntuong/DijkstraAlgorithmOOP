@@ -10,7 +10,7 @@ namespace FixedRouteTable
 {
     public class ListOfRoutePath
     {
-        public static ListOfRoutePath CreateCacheListPath()
+        public static ListOfRoutePath CreateRoutePathsStorage()
         {
             return new ListOfRoutePath();
         }
