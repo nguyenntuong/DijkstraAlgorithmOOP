@@ -62,7 +62,12 @@ namespace FixedRouteTable
             }
             else
             {
-                if (RoutePathsWithMinimumHop.NumHop > routePath.NumHop)
+                if (RoutePathsWithMinimumHop.NumHop == routePath.NumHop)
+                {
+                    if(RoutePathsWithMinimumHop.Cost > routePath.Cost)
+                        RoutePathsWithMinimumHop = routePath;
+                }
+                else if (RoutePathsWithMinimumHop.NumHop > routePath.NumHop)
                 {
                     RoutePathsWithMinimumHop = routePath;
                 }
@@ -73,7 +78,12 @@ namespace FixedRouteTable
             }
             else
             {
-                if (RoutePathsWithLeastCost.Cost > routePath.Cost)
+                if (RoutePathsWithLeastCost.Cost == routePath.Cost)
+                {
+                    if (RoutePathsWithLeastCost.NumHop > routePath.NumHop)
+                        RoutePathsWithLeastCost = routePath;
+                }
+                else if (RoutePathsWithLeastCost.Cost > routePath.Cost)
                 {
                     RoutePathsWithLeastCost = routePath;
                 }

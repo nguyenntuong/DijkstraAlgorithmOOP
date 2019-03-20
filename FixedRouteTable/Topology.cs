@@ -98,29 +98,28 @@ namespace FixedRouteTable
         }
 
         /// <summary>
-        /// Tìm tất cả đường đi từ node "from" tới "to"
+        /// Tìm tất cả đường đi từ node "from" tới "to" dựa trên Cost
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        public ListOfRoutePath RoutePath(int from, int to)
+        public ListOfRoutePath RoutePathLeastCost(int from, int to)
         {
             ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage();
-            AllNode[from].PathToFromTopology(allPathStorage: ref allPath
+            AllNode[from].PathToFromTopologyLeastCost(allPathStorage: ref allPath
                 , destinationNode: AllNode[to]);
             return allPath;
         }
         /// <summary>
-        /// Tìm tất cả đường đi từ node "from" tới "to"
-        /// sử dụng xữ lý song song
+        /// Tìm tất cả đường đi từ node "from" tới "to" dựa trên numHop
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        public ListOfRoutePath RoutePathParallel(int from, int to)
+        public ListOfRoutePath RoutePathMinimumHop(int from, int to)
         {
             ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage();
-            AllNode[from].PathToFromTopologyParallel(allPathStorage: allPath
+            AllNode[from].PathToFromTopologyMinimumHop(allPathStorage: ref allPath
                 , destinationNode: AllNode[to]);
             return allPath;
         }
@@ -134,7 +133,6 @@ namespace FixedRouteTable
         {
             int[,] metrix = new int[TopologySize, TopologySize];
             metrix.Initialize();
-            ListOfRoutePathsMetrixCache = ListOfRoutePathsMetrixCache ?? new ListOfRoutePath[TopologySize, TopologySize];
             for (int x = 0; x < TopologySize; x++)
             {
                 Dictionary<Router, Router> _routeTable = new Dictionary<Router, Router>();
@@ -148,15 +146,12 @@ namespace FixedRouteTable
                         continue;
                     }
                     ListOfRoutePath listPath;
-                    if (IsCacheMatrixSet)
-                    {
-                        listPath = ListOfRoutePathsMetrixCache[x, y];
-                    }
-                    else
-                    {
-                        listPath = RoutePath(x_transform, y_transform);
-                        ListOfRoutePathsMetrixCache[x, y] = listPath;
-                    }
+
+                    listPath = mode == Mode.LeastCost
+                        ? RoutePathLeastCost(x_transform, y_transform)
+                        :
+                        RoutePathMinimumHop(x_transform, y_transform);
+
                     if (listPath.CantRoute)
                     {
                         metrix[x, y] = -1;
@@ -170,7 +165,6 @@ namespace FixedRouteTable
                 }
                 AllNode[x + 1].ImportRouteTable(_routeTable);
             }
-            IsCacheMatrixSet = true;
             return metrix;
         }
 
@@ -184,7 +178,6 @@ namespace FixedRouteTable
         {
             int[,] metrix = new int[TopologySize, TopologySize];
             metrix.Initialize();
-            ListOfRoutePathsMetrixCache = ListOfRoutePathsMetrixCache ?? new ListOfRoutePath[TopologySize, TopologySize];
             Parallel.For(0, TopologySize, x =>
             {
                 Dictionary<Router, Router> _routeTable = new Dictionary<Router, Router>();
@@ -198,15 +191,12 @@ namespace FixedRouteTable
                         return;
                     }
                     ListOfRoutePath listPath;
-                    if (IsCacheMatrixSet)
-                    {
-                        listPath = ListOfRoutePathsMetrixCache[x, y];
-                    }
-                    else
-                    {
-                        listPath = RoutePath(x_transform, y_transform);
-                        ListOfRoutePathsMetrixCache[x, y] = listPath;
-                    }
+
+                    listPath = mode == Mode.LeastCost
+                        ? RoutePathLeastCost(x_transform, y_transform)
+                        :
+                        RoutePathMinimumHop(x_transform, y_transform);
+
                     if (listPath.CantRoute)
                     {
                         metrix[x, y] = -1;
@@ -220,7 +210,6 @@ namespace FixedRouteTable
                 });
                 AllNode[x + 1].ImportRouteTable(_routeTable);
             });
-            IsCacheMatrixSet = true;
             return metrix;
         }
 

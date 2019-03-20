@@ -3,6 +3,7 @@
  * Date: 16-3
  * Modifer-Date: 18-3
  * */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -70,22 +71,27 @@ namespace FixedRouteTable
 
         /// <summary>
         /// Tìm tất tuyến đường từ chính Router này đến một Router khác trong 
-        /// Topology chứa nó
+        /// Topology chứa nó dựa vào chi phí đường đi
         /// </summary>
         /// <param name="allPathStorage">Chứa tất cả các tuyến đường có thể đi</param>
         /// <param name="destinationNode">Đích đến</param>
         /// <param name="sourceNode">Nguồn</param>
         /// <param name="path">Đánh dấu đường đi</param>
-        public void PathToFromTopology(ref ListOfRoutePath allPathStorage
+        public void PathToFromTopologyLeastCost(ref ListOfRoutePath allPathStorage
             , Router destinationNode
-            , Router sourceNode = null
             , List<Router> path = null)
         {
-            sourceNode = sourceNode ?? this;
             path = (path ?? new List<Router>()).ToList();
             if (path.Exists(o => o.Equals(this)))
+            {
                 return;
+            }
             path.Add(this);
+            if (allPathStorage.GetLeastCostPath() != null 
+                &&RoutePath.CaculateCost(path)>allPathStorage.GetLeastCostPath().Cost)
+            {
+                return;
+            }
             if (DirectedRoutersWithCost.ContainsKey(destinationNode))
             {
                 path.Add(destinationNode);
@@ -94,37 +100,42 @@ namespace FixedRouteTable
             }
             else
             {
-                foreach (KeyValuePair<Router, int> item in DirectedRoutersWithCost
-                    .Where(o => o.Key != sourceNode
-                    || !path.Exists(po => po == o.Key)
-                    ))
+                var directedRouter = DirectedRoutersWithCost
+                    .Where(co=>!path.Exists(po => po.Equals(co.Key))
+                    );
+                foreach (KeyValuePair<Router, int> item in directedRouter)
                 {
-                    item.Key.PathToFromTopology(allPathStorage: ref allPathStorage
+                    item.Key.PathToFromTopologyLeastCost(allPathStorage: ref allPathStorage
                         , destinationNode: destinationNode
-                        , sourceNode: this
                         , path: path);
                 }
             }
         }
+
         /// <summary>
         /// Tìm tất tuyến đường từ chính Router này đến một Router khác trong 
-        /// Xữ lý song song
-        /// Topology chứa nó
+        /// Topology chứa nó dựa vào số Hop ít nhất
         /// </summary>
         /// <param name="allPathStorage">Chứa tất cả các tuyến đường có thể đi</param>
         /// <param name="destinationNode">Đích đến</param>
         /// <param name="sourceNode">Nguồn</param>
         /// <param name="path">Đánh dấu đường đi</param>
-        public void PathToFromTopologyParallel(ListOfRoutePath allPathStorage
+        public void PathToFromTopologyMinimumHop(ref ListOfRoutePath allPathStorage
             , Router destinationNode
-            , Router sourceNode = null
             , List<Router> path = null)
-        {            
-            sourceNode = sourceNode ?? this;
+        {
             path = (path ?? new List<Router>()).ToList();
             if (path.Exists(o => o.Equals(this)))
+            {
                 return;
+            }
             path.Add(this);
+            if (allPathStorage.GetMinimunHopPath() != null
+                &&                
+                path.Count > allPathStorage.GetMinimunHopPath().NumHop)
+            {
+                return;
+            }
             if (DirectedRoutersWithCost.ContainsKey(destinationNode))
             {
                 path.Add(destinationNode);
@@ -133,19 +144,17 @@ namespace FixedRouteTable
             }
             else
             {
-                Parallel.ForEach(DirectedRoutersWithCost
-                    .Where(o => o.Key != sourceNode
-                    || !path.Exists(po => po == o.Key)
-                    ), item => {
-                        item.Key.PathToFromTopologyParallel(allPathStorage: allPathStorage
+                var directedRouter = DirectedRoutersWithCost
+                    .Where(co => !path.Exists(po => po.Equals(co.Key))
+                    );
+                foreach (KeyValuePair<Router, int> item in directedRouter)
+                {
+                    item.Key.PathToFromTopologyMinimumHop(allPathStorage: ref allPathStorage
                         , destinationNode: destinationNode
-                        , sourceNode: this
                         , path: path);
-                    });
-                return;
+                }
             }
         }
-
         /// <summary>
         /// Tìm đường đi dựa vào database
         /// </summary>

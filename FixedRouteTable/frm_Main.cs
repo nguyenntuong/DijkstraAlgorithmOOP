@@ -157,6 +157,25 @@ namespace FixedRouteTable
             {
 #endif
             int topo_size = int.Parse(file.ReadLine());
+            if (InvokeRequired)
+            {
+                EndInvoke(BeginInvoke(new MethodInvoker(
+                    () =>
+                    {
+                        if(topo_size>50)
+                        {
+                            MessageBox.Show("Mô hình hơn 50 node có thể, từ chối xữ lý !");
+                        }
+                    })));
+            }
+            else
+            {
+                MessageBox.Show("Mô hình hơn 50 node có thể, từ chối xữ lý !");
+            }
+            if(topo_size>50)
+            {
+                return;
+            }
             Topology = Topology.CreateTopology(topo_size);
             string line;
             while (!(line = file.ReadLine()).Equals("0"))

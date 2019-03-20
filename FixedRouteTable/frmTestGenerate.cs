@@ -26,22 +26,22 @@ namespace FixedRouteTable
         private int max_cost = 0;
         private Random r = new Random();
 
-        private List<(int f,int t)> flag = new List<(int,int)>();
+        private List<(int f, int t)> flag = new List<(int, int)>();
         private async void button1_Click(object sender, EventArgs e)
         {
             try
             {
                 topo_size = int.Parse(textBox1.Text);
-                if (topo_size > 100)
+                if (topo_size > 70)
                 {
-                    if(MessageBox.Show("Tối đa 100 node, hơn 100 node có thể stress CPU của bạn, khá là nặng !"
-                        ,"Cảnh báo !",MessageBoxButtons.OKCancel,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button2)==DialogResult.Cancel)
-                    return;
+                    if (MessageBox.Show("Tối đa 50 - 75 node, hơn 50 node có thể stress CPU của bạn, khá là nặng !"
+                        , "Cảnh báo !", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Cancel)
+                        return;
                     MessageBox.Show("Nói rồi đứng máy đấy, chỉnh lại đi !"
                         , "Cảnh báo lần 2 !", MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1);
                     return;
                 }
-                if(topo_size<2)
+                if (topo_size < 2)
                 {
                     MessageBox.Show("Ít nhất 2 node");
                     return;
@@ -75,8 +75,9 @@ namespace FixedRouteTable
                     }
                     else
                     {
-                        if (!flag.Exists(o=>o.f==f&&o.t==t|| o.f == t && o.t == f)) {
-                            int cost = r.Next(-max_cost, max_cost);
+                        if (!flag.Exists(o => o.f == f && o.t == t || o.f == t && o.t == f))
+                        {
+                            int cost = r.Next(-max_cost * 2, max_cost);
                             if (cost < 1)
                             {
                                 cost = -1;
@@ -97,7 +98,7 @@ namespace FixedRouteTable
                         () =>
                         {
                             int percent = ((t) * (f)) / (topo_size * topo_size);
-                            progressBar1.Value = percent*100;
+                            progressBar1.Value = percent * 100;
                         })));
                     }
                     else

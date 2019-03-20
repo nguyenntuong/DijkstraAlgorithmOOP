@@ -63,6 +63,15 @@ namespace FixedRouteTable
             }
             return Cost;
         }
+        static public int CaculateCost(List<Router> path)
+        {
+            int cost = 0;
+            for (int i = 1; i < path.Count; i++)
+            {
+                cost += path[i - 1].DirectedRoutersWithCost[path[i]];
+            }
+            return cost;
+        }
 
         public Router NextHop() => IsNotValid ? null : Path[1];
     }
