@@ -17,33 +17,67 @@ namespace FixedRouteTable
 
         /// <summary>
         /// Danh sách tất cả các tuyến đường đi được
+        /// điều kiện LeastCost
         /// </summary>
-        private List<RoutePath> _routePaths;
+        private RoutePath _routePathsWithLeastCost;
 
-        public List<RoutePath> RoutePaths
+        public RoutePath RoutePathsWithLeastCost
         {
-            get => _routePaths;
-            private set => _routePaths = value;
+            get => _routePathsWithLeastCost;
+            private set => _routePathsWithLeastCost = value;
+        }
+        /// <summary>
+        /// Danh sách tất cả các tuyến đường đi được
+        /// điều kiện MinimumHop
+        /// </summary>
+        private RoutePath _routePathsWithMinimumHop;
+
+        public RoutePath RoutePathsWithMinimumHop
+        {
+            get { return _routePathsWithMinimumHop; }
+            set { _routePathsWithMinimumHop = value; }
         }
 
         /// <summary>
         /// Có thể đến đích hay không
         /// </summary>
-        public bool CanRoute => RoutePaths.Count > 0;
+        public bool CanRoute => RoutePathsWithLeastCost!=null;
 
         /// <summary>
         /// Không thể đến được đích phải không
         /// </summary>
-        public bool CantRoute => RoutePaths.Count == 0;
+        public bool CantRoute => RoutePathsWithLeastCost == null;
 
         private ListOfRoutePath()
         {
-            RoutePaths = new List<RoutePath>();
+            RoutePathsWithLeastCost = null;
+            RoutePathsWithMinimumHop = null;
         }
 
         public void Add(RoutePath routePath)
         {
-            RoutePaths.Add(routePath);
+            if (RoutePathsWithMinimumHop == null)
+            {
+                RoutePathsWithMinimumHop = routePath;
+            }
+            else
+            {
+                if (RoutePathsWithMinimumHop.NumHop > routePath.NumHop)
+                {
+                    RoutePathsWithMinimumHop = routePath;
+                }
+            }
+            if (RoutePathsWithLeastCost == null)
+            {
+                RoutePathsWithLeastCost = routePath;
+            }
+            else
+            {
+                if (RoutePathsWithLeastCost.Cost > routePath.Cost)
+                {
+                    RoutePathsWithLeastCost = routePath;
+                }
+            }
         }
 
         /// <summary>
@@ -52,10 +86,7 @@ namespace FixedRouteTable
         /// <returns></returns>
         public RoutePath GetMinimunHopPath()
         {
-            return RoutePaths
-                .OrderBy(orb => orb.Cost)
-                .Where(o => o.NumHop == RoutePaths.Min(i => i.NumHop))
-                .First();
+            return RoutePathsWithMinimumHop;
         }
 
         /// <summary>
@@ -64,10 +95,7 @@ namespace FixedRouteTable
         /// <returns></returns>
         public RoutePath GetLeastCostPath()
         {
-            return RoutePaths
-                .OrderBy(orb => orb.NumHop)
-                .Where(o => o.Cost == RoutePaths.Min(i => i.Cost))
-                .First();
+            return RoutePathsWithLeastCost;
         }
     }
 }

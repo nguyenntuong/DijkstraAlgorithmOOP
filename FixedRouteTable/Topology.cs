@@ -3,8 +3,8 @@
  * Date: 16-3
  * Modifer-Date: 18-3
  * */
-using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace FixedRouteTable
 {
@@ -30,6 +30,25 @@ namespace FixedRouteTable
         }
 
         /// <summary>
+        /// Chứa Cache định tuyến cho việc tái sử dụng
+        /// </summary>
+        private ListOfRoutePath[,] _listOfRoutePathsMetrixCache;
+
+        public ListOfRoutePath[,] ListOfRoutePathsMetrixCache
+        {
+            get { return _listOfRoutePathsMetrixCache; }
+            private set { _listOfRoutePathsMetrixCache = value; }
+        }
+
+        private bool _isCacheMatrixSet = false;
+
+        public bool IsCacheMatrixSet
+        {
+            get { return _isCacheMatrixSet; }
+            private set { _isCacheMatrixSet = value; }
+        }
+
+        /// <summary>
         /// Kích thước mô hình
         /// </summary>
         private int _topoSize;
@@ -48,7 +67,7 @@ namespace FixedRouteTable
         public Dictionary<int, Router> AllNode
         {
             get => allNode;
-            set => allNode = value;
+            private set => allNode = value;
         }
 
         private Topology(int topo_size)
@@ -78,10 +97,30 @@ namespace FixedRouteTable
             }
         }
 
+        /// <summary>
+        /// Tìm tất cả đường đi từ node "from" tới "to"
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
         public ListOfRoutePath RoutePath(int from, int to)
         {
             ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage();
             AllNode[from].PathToFromTopology(allPathStorage: ref allPath
+                , destinationNode: AllNode[to]);
+            return allPath;
+        }
+        /// <summary>
+        /// Tìm tất cả đường đi từ node "from" tới "to"
+        /// sử dụng xữ lý song song
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
+        public ListOfRoutePath RoutePathParallel(int from, int to)
+        {
+            ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage();
+            AllNode[from].PathToFromTopologyParallel(allPathStorage: allPath
                 , destinationNode: AllNode[to]);
             return allPath;
         }
@@ -93,12 +132,13 @@ namespace FixedRouteTable
         /// <returns></returns>
         public int[,] MetrixCaculate(Mode mode = Mode.LeastCost)
         {
-            int[,] metrix = new int[_topoSize, _topoSize];
+            int[,] metrix = new int[TopologySize, TopologySize];
             metrix.Initialize();
-            for (int x = 0; x < _topoSize; x++)
+            ListOfRoutePathsMetrixCache = ListOfRoutePathsMetrixCache ?? new ListOfRoutePath[TopologySize, TopologySize];
+            for (int x = 0; x < TopologySize; x++)
             {
                 Dictionary<Router, Router> _routeTable = new Dictionary<Router, Router>();
-                for (int y = 0; y < _topoSize; y++)
+                for (int y = 0; y < TopologySize; y++)
                 {
                     int x_transform = x + 1;
                     int y_transform = y + 1;
@@ -107,7 +147,16 @@ namespace FixedRouteTable
                         metrix[x, y] = 0;
                         continue;
                     }
-                    ListOfRoutePath listPath = RoutePath(x_transform, y_transform);
+                    ListOfRoutePath listPath;
+                    if (IsCacheMatrixSet)
+                    {
+                        listPath = ListOfRoutePathsMetrixCache[x, y];
+                    }
+                    else
+                    {
+                        listPath = RoutePath(x_transform, y_transform);
+                        ListOfRoutePathsMetrixCache[x, y] = listPath;
+                    }
                     if (listPath.CantRoute)
                     {
                         metrix[x, y] = -1;
@@ -117,10 +166,61 @@ namespace FixedRouteTable
                         listPath.GetLeastCostPath().NextHop().HostID
                         :
                         listPath.GetMinimunHopPath().NextHop().HostID;
-                    _routeTable.Add(AllNode[y_transform], AllNode[metrix[x, y]]);                    
+                    _routeTable.Add(AllNode[y_transform], AllNode[metrix[x, y]]);
                 }
                 AllNode[x + 1].ImportRouteTable(_routeTable);
             }
+            IsCacheMatrixSet = true;
+            return metrix;
+        }
+
+        /// <summary>
+        /// Tính toán bản định tuyến toàn Node
+        /// sử dụng xữ lý song song
+        /// </summary>
+        /// <param name="mode">Chế độ tìm đường</param>
+        /// <returns></returns>
+        public int[,] MetrixCaculateParallel(Mode mode = Mode.LeastCost)
+        {
+            int[,] metrix = new int[TopologySize, TopologySize];
+            metrix.Initialize();
+            ListOfRoutePathsMetrixCache = ListOfRoutePathsMetrixCache ?? new ListOfRoutePath[TopologySize, TopologySize];
+            Parallel.For(0, TopologySize, x =>
+            {
+                Dictionary<Router, Router> _routeTable = new Dictionary<Router, Router>();
+                ParallelLoopResult r = Parallel.For(0, TopologySize, y =>
+                {
+                    int x_transform = x + 1;
+                    int y_transform = y + 1;
+                    if (x_transform == y_transform)
+                    {
+                        metrix[x, y] = 0;
+                        return;
+                    }
+                    ListOfRoutePath listPath;
+                    if (IsCacheMatrixSet)
+                    {
+                        listPath = ListOfRoutePathsMetrixCache[x, y];
+                    }
+                    else
+                    {
+                        listPath = RoutePath(x_transform, y_transform);
+                        ListOfRoutePathsMetrixCache[x, y] = listPath;
+                    }
+                    if (listPath.CantRoute)
+                    {
+                        metrix[x, y] = -1;
+                        return;
+                    }
+                    metrix[x, y] = mode == Mode.LeastCost ?
+                        listPath.GetLeastCostPath().NextHop().HostID
+                        :
+                        listPath.GetMinimunHopPath().NextHop().HostID;
+                    _routeTable.Add(AllNode[y_transform], AllNode[metrix[x, y]]);
+                });
+                AllNode[x + 1].ImportRouteTable(_routeTable);
+            });
+            IsCacheMatrixSet = true;
             return metrix;
         }
 
@@ -128,9 +228,9 @@ namespace FixedRouteTable
         {
             get
             {
-                if (this.AllNode.ContainsKey(RID))
+                if (AllNode.ContainsKey(RID))
                 {
-                    return this.AllNode[RID];
+                    return AllNode[RID];
                 }
                 else
                 {

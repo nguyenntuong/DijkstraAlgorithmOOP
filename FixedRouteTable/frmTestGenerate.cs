@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
@@ -24,6 +25,8 @@ namespace FixedRouteTable
         private int topo_size = 0;
         private int max_cost = 0;
         private Random r = new Random();
+
+        private List<(int f,int t)> flag = new List<(int,int)>();
         private async void button1_Click(object sender, EventArgs e)
         {
             try
@@ -72,17 +75,20 @@ namespace FixedRouteTable
                     }
                     else
                     {
-                        int cost = r.Next(-max_cost*2, max_cost);
-                        if (cost < 1)
-                        {
-                            cost = -1;
-                            await writer.WriteLineAsync($"{f} {t} {cost}");
-                            await writer.WriteLineAsync($"{t} {f} {cost}");
-                        }
-                        else
-                        {
-                            await writer.WriteLineAsync($"{f} {t} {cost}");
-                            await writer.WriteLineAsync($"{t} {f} {r.Next(1, max_cost)}");
+                        if (!flag.Exists(o=>o.f==f&&o.t==t|| o.f == t && o.t == f)) {
+                            int cost = r.Next(-max_cost, max_cost);
+                            if (cost < 1)
+                            {
+                                cost = -1;
+                                await writer.WriteLineAsync($"{f} {t} {cost}");
+                                await writer.WriteLineAsync($"{t} {f} {cost}");
+                            }
+                            else
+                            {
+                                await writer.WriteLineAsync($"{f} {t} {cost}");
+                                await writer.WriteLineAsync($"{t} {f} {r.Next(1, max_cost)}");
+                            }
+                            flag.Add((f, t));
                         }
                     }
                     if (InvokeRequired)

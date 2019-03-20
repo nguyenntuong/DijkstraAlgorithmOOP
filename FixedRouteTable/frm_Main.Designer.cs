@@ -62,6 +62,7 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.tablVisual = new System.Windows.Forms.TabPage();
             this.panelBackground = new System.Windows.Forms.Panel();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.tabPanel.SuspendLayout();
             this.tabInput.SuspendLayout();
@@ -295,9 +296,9 @@
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.lstResult);
-            this.groupBox5.Location = new System.Drawing.Point(7, 73);
+            this.groupBox5.Location = new System.Drawing.Point(7, 95);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(516, 132);
+            this.groupBox5.Size = new System.Drawing.Size(516, 110);
             this.groupBox5.TabIndex = 6;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Kết quả:";
@@ -308,17 +309,18 @@
             this.lstResult.FormattingEnabled = true;
             this.lstResult.Location = new System.Drawing.Point(3, 16);
             this.lstResult.Name = "lstResult";
-            this.lstResult.Size = new System.Drawing.Size(510, 113);
+            this.lstResult.Size = new System.Drawing.Size(510, 91);
             this.lstResult.TabIndex = 0;
             this.lstResult.SelectedIndexChanged += new System.EventHandler(this.lstResult_SelectedIndexChanged);
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.checkBox1);
             this.groupBox4.Controls.Add(this.radioButton2);
             this.groupBox4.Controls.Add(this.radioButton1);
             this.groupBox4.Location = new System.Drawing.Point(7, 20);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(200, 46);
+            this.groupBox4.Size = new System.Drawing.Size(200, 69);
             this.groupBox4.TabIndex = 5;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Mode:";
@@ -326,7 +328,7 @@
             // radioButton2
             // 
             this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(126, 19);
+            this.radioButton2.Location = new System.Drawing.Point(7, 42);
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(72, 17);
             this.radioButton2.TabIndex = 4;
@@ -413,6 +415,18 @@
             this.panelBackground.Size = new System.Drawing.Size(1112, 514);
             this.panelBackground.TabIndex = 0;
             // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Checked = true;
+            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox1.Location = new System.Drawing.Point(97, 20);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(101, 17);
+            this.checkBox1.TabIndex = 5;
+            this.checkBox1.Text = "Xữ lý song song";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
             // frm_Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -479,6 +493,7 @@
         private System.Windows.Forms.Panel panelBackground;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.ToolStripMenuItem GenerateDataTestToolStripMenuItem;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
 

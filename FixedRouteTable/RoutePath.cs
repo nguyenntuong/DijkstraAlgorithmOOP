@@ -9,18 +9,11 @@ namespace FixedRouteTable
 {
     public class RoutePath
     {
-        public static RoutePath CreatePath(List<Router> path, bool ismore1000path = false)
+        public static RoutePath CreatePath(List<Router> path)
         {
-            return new RoutePath(path,ismore1000path);
+            return new RoutePath(path);
         }
 
-        private bool _morethan1000Path;
-
-        public bool IsMoreThan1000Path
-        {
-            get { return _morethan1000Path; }
-            private set { _morethan1000Path = value; }
-        }
 
         /// <summary>
         /// Đường đi
@@ -56,9 +49,8 @@ namespace FixedRouteTable
         public bool IsNotValid => Path.Count < 2;
 
 
-        private RoutePath(List<Router> path,bool ismorethan1000path)
+        private RoutePath(List<Router> path)
         {
-            IsMoreThan1000Path = ismorethan1000path;
             Path = path;
             CaculateCost();
         }

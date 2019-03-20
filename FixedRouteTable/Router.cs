@@ -5,6 +5,7 @@
  * */
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FixedRouteTable
 {
@@ -70,9 +71,8 @@ namespace FixedRouteTable
         /// <summary>
         /// Tìm tất tuyến đường từ chính Router này đến một Router khác trong 
         /// Topology chứa nó
-        /// Limited 1000 paths
         /// </summary>
-        /// <param name="allPathStorage">Chứa tất cả các tuyến đường có thể đi (Tối đa 1000 paths, nếu hơn bỏ qua)</param>
+        /// <param name="allPathStorage">Chứa tất cả các tuyến đường có thể đi</param>
         /// <param name="destinationNode">Đích đến</param>
         /// <param name="sourceNode">Nguồn</param>
         /// <param name="path">Đánh dấu đường đi</param>
@@ -81,8 +81,6 @@ namespace FixedRouteTable
             , Router sourceNode = null
             , List<Router> path = null)
         {
-            if (allPathStorage.RoutePaths.Count > 1000)
-                return;
             sourceNode = sourceNode ?? this;
             path = (path ?? new List<Router>()).ToList();
             if (path.Exists(o => o.Equals(this)))
@@ -106,6 +104,44 @@ namespace FixedRouteTable
                         , sourceNode: this
                         , path: path);
                 }
+            }
+        }
+        /// <summary>
+        /// Tìm tất tuyến đường từ chính Router này đến một Router khác trong 
+        /// Xữ lý song song
+        /// Topology chứa nó
+        /// </summary>
+        /// <param name="allPathStorage">Chứa tất cả các tuyến đường có thể đi</param>
+        /// <param name="destinationNode">Đích đến</param>
+        /// <param name="sourceNode">Nguồn</param>
+        /// <param name="path">Đánh dấu đường đi</param>
+        public void PathToFromTopologyParallel(ListOfRoutePath allPathStorage
+            , Router destinationNode
+            , Router sourceNode = null
+            , List<Router> path = null)
+        {            
+            sourceNode = sourceNode ?? this;
+            path = (path ?? new List<Router>()).ToList();
+            if (path.Exists(o => o.Equals(this)))
+                return;
+            path.Add(this);
+            if (DirectedRoutersWithCost.ContainsKey(destinationNode))
+            {
+                path.Add(destinationNode);
+                allPathStorage.Add(RoutePath.CreatePath(path));
+                return;
+            }
+            else
+            {
+                Parallel.ForEach(DirectedRoutersWithCost
+                    .Where(o => o.Key != sourceNode
+                    || !path.Exists(po => po == o.Key)
+                    ), item => {
+                        item.Key.PathToFromTopologyParallel(allPathStorage: allPathStorage
+                        , destinationNode: destinationNode
+                        , sourceNode: this
+                        , path: path);
+                    });
                 return;
             }
         }
@@ -123,11 +159,6 @@ namespace FixedRouteTable
             {
                 path.Add(current);
                 current = current.RouteTable[destination];
-                if(path.Count>1000)
-                {
-                    path.Clear();
-                    return RoutePath.CreatePath(path,true);
-                }
             }
             path.Add(destination);
             return RoutePath.CreatePath(path);

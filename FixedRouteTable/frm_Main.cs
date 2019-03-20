@@ -118,7 +118,10 @@ namespace FixedRouteTable
             openFile.Filter = "Text File|*.txt";
             openFile.Multiselect = false;
             if (openFile.ShowDialog() != DialogResult.OK)
+            {
+                UseWaitCursor = false;
                 return;
+            }
             textBox1.Text = openFile.FileName;
             Task.Factory.StartNew(() =>
             {
@@ -131,7 +134,7 @@ namespace FixedRouteTable
                 {
                     UseWaitCursor = false;
                 }
-            },TaskCreationOptions.LongRunning);
+            }, TaskCreationOptions.LongRunning);
         }
 
         private void ReadInputFile(string path)
@@ -153,28 +156,28 @@ namespace FixedRouteTable
             try
             {
 #endif
-                int topo_size = int.Parse(file.ReadLine());
-                Topology = Topology.CreateTopology(topo_size);
-                string line;
-                while (!(line = file.ReadLine()).Equals("0"))
-                {
-                    int[] args = line.Split(' ').Select(o => int.Parse(o)).ToArray();
-                    if (args[2] <= 0)
-                        continue;
-                    Topology.AddRelative(from: args[0], to: args[1], cost: args[2]);
-                }
-                if (InvokeRequired)
-                {
-                    EndInvoke(BeginInvoke(new MethodInvoker(
-                        () =>
-                        {
-                            InitUI();
-                        })));
-                }
-                else
-                {
-                    InitUI();
-                }
+            int topo_size = int.Parse(file.ReadLine());
+            Topology = Topology.CreateTopology(topo_size);
+            string line;
+            while (!(line = file.ReadLine()).Equals("0"))
+            {
+                int[] args = line.Split(' ').Select(o => int.Parse(o)).ToArray();
+                if (args[2] <= 0)
+                    continue;
+                Topology.AddRelative(from: args[0], to: args[1], cost: args[2]);
+            }
+            if (InvokeRequired)
+            {
+                EndInvoke(BeginInvoke(new MethodInvoker(
+                    () =>
+                    {
+                        InitUI();
+                    })));
+            }
+            else
+            {
+                InitUI();
+            }
 #if !DEBUG
             }
             catch
@@ -195,7 +198,7 @@ namespace FixedRouteTable
             finally
             {
 #endif
-                file.Close();
+            file.Close();
 #if !DEBUG
             }
 #endif
@@ -217,7 +220,10 @@ namespace FixedRouteTable
             cbbTo.SelectedIndex = 0;
             if (radioButton2.Checked)
             {
-                routeMetrix = Topology.MetrixCaculate(Topology.Mode.LeastCost);
+                if (checkBox1.Checked)
+                    routeMetrix = Topology.MetrixCaculateParallel(Topology.Mode.LeastCost);
+                else
+                    routeMetrix = Topology.MetrixCaculate(Topology.Mode.LeastCost);
                 DrawGrid();
             }
             else
@@ -275,7 +281,10 @@ namespace FixedRouteTable
             if (radioButton1.Checked)
             {
                 UseWaitCursor = true;
-                routeMetrix = Topology.MetrixCaculate(Topology.Mode.MinimumHop);
+                if (checkBox1.Checked)
+                    routeMetrix = Topology.MetrixCaculateParallel(Topology.Mode.MinimumHop);
+                else
+                    routeMetrix = Topology.MetrixCaculate(Topology.Mode.MinimumHop);
                 DrawGrid();
                 btnFind_Click(null, null);
                 UseWaitCursor = false;
@@ -287,7 +296,10 @@ namespace FixedRouteTable
             if (radioButton2.Checked)
             {
                 UseWaitCursor = true;
-                routeMetrix = Topology.MetrixCaculate();
+                if (checkBox1.Checked)
+                    routeMetrix = Topology.MetrixCaculateParallel(Topology.Mode.LeastCost);
+                else
+                    routeMetrix = Topology.MetrixCaculate(Topology.Mode.LeastCost);
                 DrawGrid();
                 btnFind_Click(null, null);
                 UseWaitCursor = false;
@@ -307,22 +319,11 @@ namespace FixedRouteTable
             {
                 path = Topology[from].GetRoutePathFromRoutingTable(Topology[to]);
                 if (path.IsNotValid)
-                {                    
-                    if (path.IsMoreThan1000Path)
-                    {
-                        lstResult
-                                 .Items
-                                 .Add($"Số lượng Router trung gian từ {from} =>  {to} quá lớn (Hơn 1000 Router).");
-                        lstResult
-                                 .Items
-                                 .Add($"Có thể xuất ra file nhưng không thể tính toán (giới hạn RAM)");
-                    }
-                    else
-                    {
-                        lstResult
-                              .Items
-                              .Add($"Không có tuyến đường nào từ {from} =>  {to}.");
-                    }
+                {
+
+                    lstResult
+                        .Items
+                        .Add($"Không có tuyến đường nào từ {from} =>  {to}.");
                     return;
                 }
                 for (int i = 1; i < path.Path.Count; i++)
@@ -424,9 +425,9 @@ namespace FixedRouteTable
             foreach (Control control in panelBackground.Controls)
             {
                 control.Location = new Point(
-                    control.Location.X+ Math.Abs(overlapLeft<0?overlapLeft:0)
+                    control.Location.X + Math.Abs(overlapLeft < 0 ? overlapLeft : 0)
                     ,
-                    control.Location.Y + Math.Abs(overlapTop<0?overlapTop:0)
+                    control.Location.Y + Math.Abs(overlapTop < 0 ? overlapTop : 0)
                     );
             }
         }
