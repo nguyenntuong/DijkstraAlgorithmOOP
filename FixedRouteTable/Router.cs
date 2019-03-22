@@ -12,6 +12,14 @@ namespace FixedRouteTable
 {
     public class Router
     {
+
+        /// <summary>
+        /// Khởi tạo
+        /// </summary>
+        /// <param name="iD"></param>
+        /// <returns></returns>
+        public static Router CreateNode(int iD) => new Router(iD);
+
         /// <summary>
         /// Danh sách các Router kết nối trực tiếp kết hợp với phí kết nối (Cost)
         /// Chỉ sử dụng phí cổng ra
@@ -63,51 +71,44 @@ namespace FixedRouteTable
         }
 
         /// <summary>
-        /// Khởi tạo
-        /// </summary>
-        /// <param name="iD"></param>
-        /// <returns></returns>
-        public static Router CreateNode(int iD) => new Router(iD);
-
-        /// <summary>
         /// Tìm tất tuyến đường từ chính Router này đến một Router khác trong 
         /// Topology chứa nó dựa vào chi phí đường đi
         /// </summary>
-        /// <param name="allPathStorage">Chứa tất cả các tuyến đường có thể đi</param>
+        /// <param name="pathStorage">Chứa tất cả các tuyến đường có thể đi</param>
         /// <param name="destinationNode">Đích đến</param>
         /// <param name="sourceNode">Nguồn</param>
-        /// <param name="path">Đánh dấu đường đi</param>
-        public void PathToFromTopologyLeastCost(ref ListOfRoutePath allPathStorage
+        /// <param name="pathTracking">Đánh dấu đường đi</param>
+        public void PathToFromTopologyLeastCost(ref ListOfRoutePath pathStorage
             , Router destinationNode
-            , List<Router> path = null)
+            , List<Router> pathTracking = null)
         {
-            path = (path ?? new List<Router>()).ToList();
-            if (path.Exists(o => o.Equals(this)))
+            pathTracking = (pathTracking ?? new List<Router>()).ToList();
+            if (pathTracking.Exists(o => o.Equals(this)))
             {
                 return;
             }
-            path.Add(this);
-            if (allPathStorage.GetLeastCostPath() != null 
-                &&RoutePath.CaculateCost(path)>allPathStorage.GetLeastCostPath().Cost)
+            pathTracking.Add(this);
+            if (pathStorage.GetLeastCostPath() != null 
+                &&RoutePath.CaculateCost(pathTracking)>pathStorage.GetLeastCostPath().Cost)
             {
                 return;
             }
             if (DirectedRoutersWithCost.ContainsKey(destinationNode))
             {
-                path.Add(destinationNode);
-                allPathStorage.Add(RoutePath.CreatePath(path));
+                pathTracking.Add(destinationNode);
+                pathStorage.Add(RoutePath.CreatePath(pathTracking));
                 return;
             }
             else
             {
                 var directedRouter = DirectedRoutersWithCost
-                    .Where(co=>!path.Exists(po => po.Equals(co.Key))
+                    .Where(co=>!pathTracking.Exists(po => po.Equals(co.Key))
                     );
                 foreach (KeyValuePair<Router, int> item in directedRouter)
                 {
-                    item.Key.PathToFromTopologyLeastCost(allPathStorage: ref allPathStorage
+                    item.Key.PathToFromTopologyLeastCost(pathStorage: ref pathStorage
                         , destinationNode: destinationNode
-                        , path: path);
+                        , pathTracking: pathTracking);
                 }
             }
         }
@@ -116,42 +117,42 @@ namespace FixedRouteTable
         /// Tìm tất tuyến đường từ chính Router này đến một Router khác trong 
         /// Topology chứa nó dựa vào số Hop ít nhất
         /// </summary>
-        /// <param name="allPathStorage">Chứa tất cả các tuyến đường có thể đi</param>
+        /// <param name="pathStorage">Chứa tất cả các tuyến đường có thể đi</param>
         /// <param name="destinationNode">Đích đến</param>
         /// <param name="sourceNode">Nguồn</param>
-        /// <param name="path">Đánh dấu đường đi</param>
-        public void PathToFromTopologyMinimumHop(ref ListOfRoutePath allPathStorage
+        /// <param name="pathTracking">Đánh dấu đường đi</param>
+        public void PathToFromTopologyMinimumHop(ref ListOfRoutePath pathStorage
             , Router destinationNode
-            , List<Router> path = null)
+            , List<Router> pathTracking = null)
         {
-            path = (path ?? new List<Router>()).ToList();
-            if (path.Exists(o => o.Equals(this)))
+            pathTracking = (pathTracking ?? new List<Router>()).ToList();
+            if (pathTracking.Exists(o => o.Equals(this)))
             {
                 return;
             }
-            path.Add(this);
-            if (allPathStorage.GetMinimunHopPath() != null
+            pathTracking.Add(this);
+            if (pathStorage.GetMinimunHopPath() != null
                 &&                
-                path.Count > allPathStorage.GetMinimunHopPath().NumHop)
+                pathTracking.Count > pathStorage.GetMinimunHopPath().NumHop)
             {
                 return;
             }
             if (DirectedRoutersWithCost.ContainsKey(destinationNode))
             {
-                path.Add(destinationNode);
-                allPathStorage.Add(RoutePath.CreatePath(path));
+                pathTracking.Add(destinationNode);
+                pathStorage.Add(RoutePath.CreatePath(pathTracking));
                 return;
             }
             else
             {
                 var directedRouter = DirectedRoutersWithCost
-                    .Where(co => !path.Exists(po => po.Equals(co.Key))
+                    .Where(co => !pathTracking.Exists(po => po.Equals(co.Key))
                     );
                 foreach (KeyValuePair<Router, int> item in directedRouter)
                 {
-                    item.Key.PathToFromTopologyMinimumHop(allPathStorage: ref allPathStorage
+                    item.Key.PathToFromTopologyMinimumHop(pathStorage: ref pathStorage
                         , destinationNode: destinationNode
-                        , path: path);
+                        , pathTracking: pathTracking);
                 }
             }
         }
@@ -172,6 +173,7 @@ namespace FixedRouteTable
             path.Add(destination);
             return RoutePath.CreatePath(path);
         }
+
         public override string ToString()
         {
             string present = $"Router: {HostID} - DirectedNode: {DirectedRoutersWithCost.Count} => {{";

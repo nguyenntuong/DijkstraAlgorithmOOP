@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -17,20 +18,28 @@ namespace FixedRouteTable
         /// </summary>
         private Topology topology;
 
-        private Topology Topology
+        public Topology Topology
         {
             get => topology;
             set
             {
-                Topology tmp = topology;
-                topology = value;
-                TopoSet?.Invoke(tmp, EventArgs.Empty);
+                if (value != null)
+                {
+                    if (!value.Equals(topology))
+                    {
+                        topology = value;
+                        NeedToReDraw = true;
+                        IsTopoChange = true;
+                    }
+                    else
+                    {
+                        NeedToReDraw = false;
+                        IsTopoChange = false;
+                    }
+                }
+                TopoSet?.Invoke(this, EventArgs.Empty);
             }
         }
-        /// <summary>
-        /// Event handler
-        /// </summary>
-        private EventHandler TopoSet;
 
         /// <summary>
         /// Random Color
@@ -51,7 +60,19 @@ namespace FixedRouteTable
         /// Xác định có nên vẽ lại mô hình hay không
         /// </summary>
         private bool NeedToReDraw = false;
+
+        private bool IsTopoChange = false;
         #endregion
+
+        #region Delegate
+
+        /// <summary>
+        /// Event handler
+        /// </summary>
+        private EventHandler TopoSet;
+
+        #endregion
+
         public frm_Main()
         {
             InitializeComponent();
@@ -70,14 +91,6 @@ namespace FixedRouteTable
                             else
                             {
                                 gBFunction.Enabled = true;
-                                if (Topology.Equals(o))
-                                {
-                                    NeedToReDraw = false;
-                                }
-                                else
-                                {
-                                    NeedToReDraw = true;
-                                }
                             }
                         })));
                 }
@@ -90,54 +103,40 @@ namespace FixedRouteTable
                     else
                     {
                         gBFunction.Enabled = true;
-                        if (Topology.Equals(o))
-                        {
-                            NeedToReDraw = false;
-                        }
-                        else
-                        {
-                            NeedToReDraw = true;
-                        }
                     }
                 }
             });
             Topology = null;
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        #region Function
+        private void WriteTopoToFile(string path)
         {
-            Close();
-            Application.Exit();
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            UseWaitCursor = true;
-            OpenFileDialog openFile = new OpenFileDialog();
-            openFile.InitialDirectory = Application.StartupPath;
-            openFile.Filter = "Text File|*.txt";
-            openFile.Multiselect = false;
-            if (openFile.ShowDialog() != DialogResult.OK)
+            StreamWriter writer = new StreamWriter(path);
+            try
             {
-                UseWaitCursor = false;
+                writer.WriteLine(Topology.TopologySize);
+                foreach (KeyValuePair<int, Router> lnode in Topology.AllNode)
+                {
+                    foreach (KeyValuePair<Router, int> rnode in lnode.Value.DirectedRoutersWithCost)
+                    {
+                        writer.WriteLine($"{lnode.Key} {rnode.Key.HostID} {rnode.Value}");
+                    }
+                }
+                writer.WriteLine("0");
+            }
+            catch
+            {
+                MessageBox.Show("Không thể ghi file !");
                 return;
             }
-            textBox1.Text = openFile.FileName;
-            Task.Factory.StartNew(() =>
+            finally
             {
-                ReadInputFile(openFile.FileName);
-                if (InvokeRequired)
-                {
-                    UseWaitCursor = false;
-                }
-                else
-                {
-                    UseWaitCursor = false;
-                }
-            }, TaskCreationOptions.LongRunning);
+                writer.Dispose();
+            }
         }
 
-        private void ReadInputFile(string path)
+        private void ReadInputFromFile(string path)
         {
             if (InvokeRequired)
             {
@@ -157,25 +156,7 @@ namespace FixedRouteTable
             {
 #endif
             int topo_size = int.Parse(file.ReadLine());
-            if (InvokeRequired)
-            {
-                EndInvoke(BeginInvoke(new MethodInvoker(
-                    () =>
-                    {
-                        if(topo_size>50)
-                        {
-                            MessageBox.Show("Mô hình hơn 50 node có thể, từ chối xữ lý !");
-                        }
-                    })));
-            }
-            else
-            {
-                MessageBox.Show("Mô hình hơn 50 node có thể, từ chối xữ lý !");
-            }
-            if(topo_size>50)
-            {
-                return;
-            }
+
             Topology = Topology.CreateTopology(topo_size);
             string line;
             while (!(line = file.ReadLine()).Equals("0"))
@@ -217,19 +198,25 @@ namespace FixedRouteTable
             finally
             {
 #endif
-            file.Close();
+            file.Dispose();
 #if !DEBUG
             }
 #endif
 
         }
+
         private void ClearUI()
         {
             listBox1.Items.Clear();
             lstResult.Items.Clear();
             cbbFrom.Items.Clear();
             cbbTo.Items.Clear();
+            dataGridView1.Columns.Clear();
+            dataGridView1.Rows.Clear();
+            radioButton1.Checked = radioButton2.Checked = false;
+            checkBox1.Checked = true;
         }
+
         private void InitUI()
         {
             listBox1.Items.AddRange(Topology.AllNode.Values.ToArray());
@@ -237,32 +224,9 @@ namespace FixedRouteTable
             cbbTo.Items.AddRange(Topology.AllNode.Select((o) => (object)o.Key).ToArray());
             cbbFrom.SelectedIndex = 0;
             cbbTo.SelectedIndex = 0;
-            if (radioButton2.Checked)
-            {
-                if (checkBox1.Checked)
-                    routeMetrix = Topology.MetrixCaculateParallel(Topology.Mode.LeastCost);
-                else
-                    routeMetrix = Topology.MetrixCaculate(Topology.Mode.LeastCost);
-                DrawGrid();
-            }
-            else
-            {
-                radioButton2.Checked = true;
-            }
+            radioButton1.Checked = true;
         }
 
-
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            dataGridView1.ClearSelection();
-            ListBox lstB = sender as ListBox;
-            int index = lstB.SelectedIndex;
-            index = Topology.AllNode[index + 1].HostID;
-            for (int i = 0; i < dataGridView1.Rows.Count; i++)
-            {
-                dataGridView1.Rows[i].Cells[index].Selected = true;
-            }
-        }
         private void DrawGrid()
         {
             dataGridView1.Columns.Clear();
@@ -295,101 +259,27 @@ namespace FixedRouteTable
             dataGridView1.ClearSelection();
         }
 
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        private void GenerateMatrixTableAndDrawGird()
         {
-            if (radioButton1.Checked)
+            IsTopoChange = false;
+            UseWaitCursor = true;
+            if (checkBox1.Checked)
             {
-                UseWaitCursor = true;
-                if (checkBox1.Checked)
+                if (radioButton1.Checked)
                     routeMetrix = Topology.MetrixCaculateParallel(Topology.Mode.MinimumHop);
                 else
-                    routeMetrix = Topology.MetrixCaculate(Topology.Mode.MinimumHop);
-                DrawGrid();
-                btnFind_Click(null, null);
-                UseWaitCursor = false;
-            }
-        }
-
-        private void radioButton2_CheckedChanged(object sender, EventArgs e)
-        {
-            if (radioButton2.Checked)
-            {
-                UseWaitCursor = true;
-                if (checkBox1.Checked)
                     routeMetrix = Topology.MetrixCaculateParallel(Topology.Mode.LeastCost);
-                else
-                    routeMetrix = Topology.MetrixCaculate(Topology.Mode.LeastCost);
-                DrawGrid();
-                btnFind_Click(null, null);
-                UseWaitCursor = false;
-            }
-        }
-
-        private void btnFind_Click(object sender, EventArgs e)
-        {
-            lstResult.Items.Clear();
-            int from = (int)cbbFrom.SelectedItem;
-            int to = (int)cbbTo.SelectedItem;
-            if (from == to)
-            {
-                lstResult.Items.Add("Nguồn và Đích phải khác nhau !");
             }
             else
             {
-                path = Topology[from].GetRoutePathFromRoutingTable(Topology[to]);
-                if (path.IsNotValid)
-                {
-
-                    lstResult
-                        .Items
-                        .Add($"Không có tuyến đường nào từ {from} =>  {to}.");
-                    return;
-                }
-                for (int i = 1; i < path.Path.Count; i++)
-                {
-                    lstResult
-                        .Items
-                        .Add($"Nguồn: {path.Path[i - 1].HostID} " +
-                        $"-> Đích: {path.Path[i].HostID} " +
-                        $"| Cost: {path.Path[i - 1].DirectedRoutersWithCost[path.Path[i]]}");
-                }
-                string mode = radioButton1.Checked ? "Router đi qua" : "Phí";
-                string discription = radioButton1.Checked ? " (Không tính nguồn)" : "";
-                int result = radioButton1.Checked ? path.NumHop : path.Cost;
-                lstResult
-                        .Items
-                        .Add($"Tổng {mode}:  {result}{discription}.");
+                if (radioButton1.Checked)
+                    routeMetrix = Topology.MetrixCaculate(Topology.Mode.MinimumHop);
+                else
+                    routeMetrix = Topology.MetrixCaculate(Topology.Mode.LeastCost);
             }
-        }
-
-
-        private void lstResult_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            dataGridView1.ClearSelection();
-            ListBox list = sender as ListBox;
-            int index = list.SelectedIndex;
-            if (index >= 0 && index < path.NumHop)
-            {
-                int source = path.Path[index].HostID;
-                int destination = path.Path.Last().HostID;
-                dataGridView1.Rows[destination - 1].Cells[source].Selected = true;
-            }
-        }
-
-        private void tabPanel_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (tabPanel.SelectedTab.Equals(tablVisual))
-            {
-                if (Topology != null)
-                {
-                    if (NeedToReDraw)
-                    {
-                        DrawTopology();
-                        NeedToReDraw = false;
-                    }
-                    DrawLink();
-                }
-            }
+            DrawGrid();
+            btnFind_Click(null, null);
+            UseWaitCursor = false;
         }
 
         /// <summary>
@@ -450,6 +340,7 @@ namespace FixedRouteTable
                     );
             }
         }
+
         bool CheckRouterIsDraw(Router router)
         {
             int sum = panelBackground.Controls
@@ -457,6 +348,7 @@ namespace FixedRouteTable
                 .Sum(o => o.Self.Equals(router) ? 1 : 0);
             return sum != 0;
         }
+
         Control GetRouterIsDrawed(Router router)
         {
             RouterControlUI rCUI = panelBackground.Controls
@@ -464,7 +356,6 @@ namespace FixedRouteTable
                 .Where(o => o.Self.Equals(router)).FirstOrDefault();
             return rCUI;
         }
-
 
         /// <summary>
         /// Vẽ liên kết giữa các Router
@@ -488,6 +379,7 @@ namespace FixedRouteTable
                 }
             }
         }
+
         /// <summary>
         /// Vẽ các node liên kết trực tiếp xung quanh node hiện tại
         /// </summary>
@@ -550,6 +442,7 @@ namespace FixedRouteTable
             //    DrawDrectedRouter(nodeuiaround.Location, DirectedRouter);
             //}
         }
+
         /// <summary>
         /// Vẽ đường liên kết giữa các node
         /// </summary>
@@ -604,6 +497,136 @@ namespace FixedRouteTable
             g.Dispose();
         }
 
+
+        #endregion
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+            Application.Exit();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            UseWaitCursor = true;
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.InitialDirectory = Application.StartupPath;
+            openFile.Filter = "Text File|*.txt";
+            openFile.Multiselect = false;
+            if (openFile.ShowDialog() != DialogResult.OK)
+            {
+                UseWaitCursor = false;
+                return;
+            }
+            textBox1.Text = openFile.FileName;
+            Task.Factory.StartNew(() =>
+            {
+                ReadInputFromFile(openFile.FileName);
+                if (InvokeRequired)
+                {
+                    UseWaitCursor = false;
+                }
+                else
+                {
+                    UseWaitCursor = false;
+                }
+            }, TaskCreationOptions.LongRunning);
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            dataGridView1.ClearSelection();
+            ListBox lstB = sender as ListBox;
+            int index = lstB.SelectedIndex;
+            index = Topology.AllNode[index + 1].HostID;
+            for (int i = 0; i < dataGridView1.Rows.Count; i++)
+            {
+                dataGridView1.Rows[i].Cells[index].Selected = true;
+            }
+        }
+
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton1.Checked)
+            {
+                GenerateMatrixTableAndDrawGird();
+            }
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton2.Checked)
+            {
+                GenerateMatrixTableAndDrawGird();
+            }
+        }
+
+        private void btnFind_Click(object sender, EventArgs e)
+        {
+            lstResult.Items.Clear();
+            int from = (int)cbbFrom.SelectedItem;
+            int to = (int)cbbTo.SelectedItem;
+            if (from == to)
+            {
+                lstResult.Items.Add("Nguồn và Đích phải khác nhau !");
+            }
+            else
+            {
+                path = Topology[from].GetRoutePathFromRoutingTable(Topology[to]);
+                if (path.IsNotValid)
+                {
+
+                    lstResult
+                        .Items
+                        .Add($"Không có tuyến đường nào từ {from} =>  {to}.");
+                    return;
+                }
+                for (int i = 1; i < path.Path.Count; i++)
+                {
+                    lstResult
+                        .Items
+                        .Add($"Nguồn: {path.Path[i - 1].HostID} " +
+                        $"-> Đích: {path.Path[i].HostID} " +
+                        $"| Cost: {path.Path[i - 1].DirectedRoutersWithCost[path.Path[i]]}");
+                }
+                string mode = radioButton1.Checked ? "Router đi qua" : "Phí";
+                string discription = radioButton1.Checked ? " (Không tính nguồn)" : "";
+                int result = radioButton1.Checked ? path.NumHop : path.Cost;
+                lstResult
+                        .Items
+                        .Add($"Tổng {mode}:  {result}{discription}.");
+            }
+        }
+
+        private void lstResult_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            dataGridView1.ClearSelection();
+            ListBox list = sender as ListBox;
+            int index = list.SelectedIndex;
+            if (index >= 0 && index < path.NumHop)
+            {
+                int source = path.Path[index].HostID;
+                int destination = path.Path.Last().HostID;
+                dataGridView1.Rows[destination - 1].Cells[source].Selected = true;
+            }
+        }
+
+        private void tabPanel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabPanel.SelectedTab.Equals(tablVisual))
+            {
+                if (Topology != null)
+                {
+                    if (NeedToReDraw)
+                    {
+                        DrawTopology();
+                        NeedToReDraw = false;
+                    }
+                    DrawLink();
+                }
+            }
+        }
+
         private void frm_Main_Load(object sender, EventArgs e)
         {
             panelBackground.MouseWheel += PanelBackground_MouseWheel;
@@ -622,6 +645,60 @@ namespace FixedRouteTable
             Form frmTestGenerate = new frmTestGenerate();
             frmTestGenerate.Owner = this;
             frmTestGenerate.Show();
+        }
+
+        private void xuấtMôHìnhToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Topology == null)
+            {
+                MessageBox.Show("Không có mô hình để xuất !", "Thông báo !");
+                return;
+            }
+            SaveFileDialog saveFile = new SaveFileDialog();
+            saveFile.InitialDirectory = Application.StartupPath;
+            saveFile.RestoreDirectory = true;
+            saveFile.Filter = "Text File|*.txt";
+            if (saveFile.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+            WriteTopoToFile(saveFile.FileName);
+            if (MessageBox.Show($"Đã xuất mô hình !\nMở ngay bây giờ ?", "Thông báo !", MessageBoxButtons.OKCancel)
+                == DialogResult.OK)
+            {
+                try
+                {
+                    Process.Start(saveFile.FileName);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Form frmInput = new frmMutualInput();
+            frmInput.Owner = this;
+            frmInput.FormClosing += FrmInput_FormClosing;
+            frmInput.Show();
+        }
+
+        private void FrmInput_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (Topology != null && IsTopoChange)
+            {
+                ClearUI();
+                InitUI();
+            }
+        }
+
+        private void authorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form frm = new frmAbout();
+            frm.Owner = this;
+            frm.Show();
         }
     }
 }

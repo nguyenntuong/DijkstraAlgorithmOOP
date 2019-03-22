@@ -87,6 +87,53 @@ namespace FixedRouteTable
             AllNode[from].RelativeNode(AllNode[to], cost);
         }
 
+        /// <summary>
+        /// Gở bỏ kết nối giữa 2 NODE
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        public void RemoveRelative(int from,int to)
+        {
+            AllNode[from]
+                    .DirectedRoutersWithCost
+                    .Remove(AllNode[to]);
+        }
+
+        /// <summary>
+        /// Cập nhật Cost outgoing
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="cost"></param>
+        public void UpdateRelative(int from,int to,int cost)
+        {
+            if(AllNode[from].DirectedRoutersWithCost[AllNode[to]]!=cost)
+            {
+                AllNode[from].DirectedRoutersWithCost[AllNode[to]] = cost;
+            }
+        }
+
+        /// <summary>
+        /// Check 2 Node có kết nối với nhau không
+        /// </summary>
+        /// <param name="node1"></param>
+        /// <param name="node2"></param>
+        /// <returns></returns>
+        public bool HasLinkConnect(int node1,int node2)
+        {
+            return AllNode[node1]
+                    .DirectedRoutersWithCost
+                    .ContainsKey(AllNode[node2])
+                    &&
+                    AllNode[node2]
+                    .DirectedRoutersWithCost
+                    .ContainsKey(AllNode[node1]);
+        }
+
+        /// <summary>
+        /// Khởi tạo tất cả các Node trong mô hình với thông số mặc định
+        /// </summary>
+        /// <param name="numNode"></param>
         private void CreateAllNode(int numNode)
         {
             AllNode = new Dictionary<int, Router>(numNode);
@@ -105,8 +152,8 @@ namespace FixedRouteTable
         /// <returns></returns>
         public ListOfRoutePath RoutePathLeastCost(int from, int to)
         {
-            ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage();
-            AllNode[from].PathToFromTopologyLeastCost(allPathStorage: ref allPath
+            ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage(Mode.LeastCost);
+            AllNode[from].PathToFromTopologyLeastCost(pathStorage: ref allPath
                 , destinationNode: AllNode[to]);
             return allPath;
         }
@@ -118,8 +165,8 @@ namespace FixedRouteTable
         /// <returns></returns>
         public ListOfRoutePath RoutePathMinimumHop(int from, int to)
         {
-            ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage();
-            AllNode[from].PathToFromTopologyMinimumHop(allPathStorage: ref allPath
+            ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage(Mode.MinimumHop);
+            AllNode[from].PathToFromTopologyMinimumHop(pathStorage: ref allPath
                 , destinationNode: AllNode[to]);
             return allPath;
         }
@@ -148,7 +195,8 @@ namespace FixedRouteTable
                     ListOfRoutePath listPath;
 
                     listPath = mode == Mode.LeastCost
-                        ? RoutePathLeastCost(x_transform, y_transform)
+                        ? 
+                        RoutePathLeastCost(x_transform, y_transform)
                         :
                         RoutePathMinimumHop(x_transform, y_transform);
 
@@ -157,10 +205,7 @@ namespace FixedRouteTable
                         metrix[x, y] = -1;
                         continue;
                     }
-                    metrix[x, y] = mode == Mode.LeastCost ?
-                        listPath.GetLeastCostPath().NextHop().HostID
-                        :
-                        listPath.GetMinimunHopPath().NextHop().HostID;
+                    metrix[x, y] = listPath.GetPath().NextHop().HostID;
                     _routeTable.Add(AllNode[y_transform], AllNode[metrix[x, y]]);
                 }
                 AllNode[x + 1].ImportRouteTable(_routeTable);
@@ -193,7 +238,8 @@ namespace FixedRouteTable
                     ListOfRoutePath listPath;
 
                     listPath = mode == Mode.LeastCost
-                        ? RoutePathLeastCost(x_transform, y_transform)
+                        ? 
+                        RoutePathLeastCost(x_transform, y_transform)
                         :
                         RoutePathMinimumHop(x_transform, y_transform);
 
@@ -202,10 +248,7 @@ namespace FixedRouteTable
                         metrix[x, y] = -1;
                         return;
                     }
-                    metrix[x, y] = mode == Mode.LeastCost ?
-                        listPath.GetLeastCostPath().NextHop().HostID
-                        :
-                        listPath.GetMinimunHopPath().NextHop().HostID;
+                    metrix[x, y] = listPath.GetPath().NextHop().HostID;
                     _routeTable.Add(AllNode[y_transform], AllNode[metrix[x, y]]);
                 });
                 AllNode[x + 1].ImportRouteTable(_routeTable);
@@ -223,7 +266,7 @@ namespace FixedRouteTable
                 }
                 else
                 {
-                    throw new System.IndexOutOfRangeException();
+                    throw new System.Exception($"Không tồn tại Router {RID} trong Topology");
                 }
             }
         }

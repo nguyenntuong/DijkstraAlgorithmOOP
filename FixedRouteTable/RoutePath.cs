@@ -29,7 +29,7 @@ namespace FixedRouteTable
         /// <summary>
         /// Tổng phí của đường này
         /// </summary>
-        private int _cost;
+        private int _cost = 0;
 
         public int Cost
         {
@@ -55,13 +55,12 @@ namespace FixedRouteTable
             CaculateCost();
         }
 
-        private int CaculateCost()
+        private void CaculateCost()
         {
             for (int i = 1; i < Path.Count; i++)
             {
                 Cost += Path[i - 1].DirectedRoutersWithCost[Path[i]];
             }
-            return Cost;
         }
         static public int CaculateCost(List<Router> path)
         {

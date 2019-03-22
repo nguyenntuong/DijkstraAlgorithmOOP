@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FixedRouteTable")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Tạo bản định tuyến bằng thuật toán Dijkstra")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("NONE")]
 [assembly: AssemblyProduct("FixedRouteTable")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]

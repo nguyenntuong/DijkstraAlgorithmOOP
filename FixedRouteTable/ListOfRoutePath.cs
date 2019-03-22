@@ -3,17 +3,24 @@
  * Date: 16-3
  * Modifer-Date: 18-3
  * */
-using System.Collections.Generic;
-using System.Linq;
 
 namespace FixedRouteTable
 {
     public class ListOfRoutePath
     {
-        public static ListOfRoutePath CreateRoutePathsStorage()
+        public static ListOfRoutePath CreateRoutePathsStorage(Topology.Mode mode)
         {
-            return new ListOfRoutePath();
+            return new ListOfRoutePath(mode);
         }
+
+        private Topology.Mode mode;
+
+        public Topology.Mode Mode
+        {
+            get { return mode; }
+            private set { mode = value; }
+        }
+
 
         /// <summary>
         /// Danh sách tất cả các tuyến đường đi được
@@ -35,57 +42,64 @@ namespace FixedRouteTable
         public RoutePath RoutePathsWithMinimumHop
         {
             get { return _routePathsWithMinimumHop; }
-            set { _routePathsWithMinimumHop = value; }
+            private set { _routePathsWithMinimumHop = value; }
         }
 
         /// <summary>
         /// Có thể đến đích hay không
         /// </summary>
-        public bool CanRoute => RoutePathsWithLeastCost!=null;
+        public bool CanRoute => RoutePathsWithLeastCost != null||RoutePathsWithMinimumHop!=null;
 
         /// <summary>
         /// Không thể đến được đích phải không
         /// </summary>
-        public bool CantRoute => RoutePathsWithLeastCost == null;
+        public bool CantRoute => RoutePathsWithLeastCost == null && RoutePathsWithMinimumHop==null;
 
-        private ListOfRoutePath()
+        private ListOfRoutePath(Topology.Mode mode)
         {
+            Mode = mode;
             RoutePathsWithLeastCost = null;
             RoutePathsWithMinimumHop = null;
         }
 
         public void Add(RoutePath routePath)
         {
-            if (RoutePathsWithMinimumHop == null)
+            if (Mode == Topology.Mode.LeastCost)
             {
-                RoutePathsWithMinimumHop = routePath;
+                if (RoutePathsWithLeastCost == null)
+                {
+                    RoutePathsWithLeastCost = routePath;
+                }
+                else
+                {
+                    if (RoutePathsWithLeastCost.Cost == routePath.Cost)
+                    {
+                        if (RoutePathsWithLeastCost.NumHop > routePath.NumHop)
+                            RoutePathsWithLeastCost = routePath;
+                    }
+                    else if (RoutePathsWithLeastCost.Cost > routePath.Cost)
+                    {
+                        RoutePathsWithLeastCost = routePath;
+                    }
+                }
             }
             else
             {
-                if (RoutePathsWithMinimumHop.NumHop == routePath.NumHop)
-                {
-                    if(RoutePathsWithMinimumHop.Cost > routePath.Cost)
-                        RoutePathsWithMinimumHop = routePath;
-                }
-                else if (RoutePathsWithMinimumHop.NumHop > routePath.NumHop)
+                if (RoutePathsWithMinimumHop == null)
                 {
                     RoutePathsWithMinimumHop = routePath;
                 }
-            }
-            if (RoutePathsWithLeastCost == null)
-            {
-                RoutePathsWithLeastCost = routePath;
-            }
-            else
-            {
-                if (RoutePathsWithLeastCost.Cost == routePath.Cost)
+                else
                 {
-                    if (RoutePathsWithLeastCost.NumHop > routePath.NumHop)
-                        RoutePathsWithLeastCost = routePath;
-                }
-                else if (RoutePathsWithLeastCost.Cost > routePath.Cost)
-                {
-                    RoutePathsWithLeastCost = routePath;
+                    if (RoutePathsWithMinimumHop.NumHop == routePath.NumHop)
+                    {
+                        if (RoutePathsWithMinimumHop.Cost > routePath.Cost)
+                            RoutePathsWithMinimumHop = routePath;
+                    }
+                    else if (RoutePathsWithMinimumHop.NumHop > routePath.NumHop)
+                    {
+                        RoutePathsWithMinimumHop = routePath;
+                    }
                 }
             }
         }
@@ -106,6 +120,14 @@ namespace FixedRouteTable
         public RoutePath GetLeastCostPath()
         {
             return RoutePathsWithLeastCost;
+        }
+
+        public RoutePath GetPath()
+        {
+            return Mode == Topology.Mode.LeastCost ?
+                RoutePathsWithLeastCost
+                :
+                RoutePathsWithMinimumHop;
         }
     }
 }
