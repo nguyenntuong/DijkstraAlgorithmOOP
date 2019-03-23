@@ -116,7 +116,7 @@ namespace FixedRouteTable
             try
             {
                 writer.WriteLine(Topology.TopologySize);
-                foreach (KeyValuePair<int, Router> lnode in Topology.AllNode)
+                foreach (KeyValuePair<int, Router> lnode in Topology.Routers)
                 {
                     foreach (KeyValuePair<Router, int> rnode in lnode.Value.DirectedRoutersWithCost)
                     {
@@ -214,14 +214,13 @@ namespace FixedRouteTable
             dataGridView1.Columns.Clear();
             dataGridView1.Rows.Clear();
             radioButton1.Checked = radioButton2.Checked = false;
-            checkBox1.Checked = true;
         }
 
         private void InitUI()
         {
-            listBox1.Items.AddRange(Topology.AllNode.Values.ToArray());
-            cbbFrom.Items.AddRange(Topology.AllNode.Select((o) => (object)o.Key).ToArray());
-            cbbTo.Items.AddRange(Topology.AllNode.Select((o) => (object)o.Key).ToArray());
+            listBox1.Items.AddRange(Topology.Routers.Values.ToArray());
+            cbbFrom.Items.AddRange(Topology.Routers.Select((o) => (object)o.Key).ToArray());
+            cbbTo.Items.AddRange(Topology.Routers.Select((o) => (object)o.Key).ToArray());
             cbbFrom.SelectedIndex = 0;
             cbbTo.SelectedIndex = 0;
             radioButton1.Checked = true;
@@ -293,11 +292,11 @@ namespace FixedRouteTable
             int centerY = panelBackground.Location.Y + panelBackground.Size.Height / 2;
 
             KeyValuePair<int, Router> centerRouter = Topology
-                .AllNode
+                .Routers
                 .Where(
                 o => o.Value.DirectedRoutersWithCost.Count
                 ==
-                Topology.AllNode.Max(mo => mo.Value.DirectedRoutersWithCost.Count))
+                Topology.Routers.Max(mo => mo.Value.DirectedRoutersWithCost.Count))
                 .First();
             int firstLeftX = panelBackground.Size.Width / 3;
 
@@ -538,7 +537,7 @@ namespace FixedRouteTable
             dataGridView1.ClearSelection();
             ListBox lstB = sender as ListBox;
             int index = lstB.SelectedIndex;
-            index = Topology.AllNode[index + 1].HostID;
+            index = Topology.Routers[index + 1].HostID;
             for (int i = 0; i < dataGridView1.Rows.Count; i++)
             {
                 dataGridView1.Rows[i].Cells[index].Selected = true;

@@ -4,6 +4,7 @@
  * Modifer-Date: 18-3
  * */
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace FixedRouteTable
@@ -30,25 +31,6 @@ namespace FixedRouteTable
         }
 
         /// <summary>
-        /// Chứa Cache định tuyến cho việc tái sử dụng
-        /// </summary>
-        private ListOfRoutePath[,] _listOfRoutePathsMetrixCache;
-
-        public ListOfRoutePath[,] ListOfRoutePathsMetrixCache
-        {
-            get { return _listOfRoutePathsMetrixCache; }
-            private set { _listOfRoutePathsMetrixCache = value; }
-        }
-
-        private bool _isCacheMatrixSet = false;
-
-        public bool IsCacheMatrixSet
-        {
-            get { return _isCacheMatrixSet; }
-            private set { _isCacheMatrixSet = value; }
-        }
-
-        /// <summary>
         /// Kích thước mô hình
         /// </summary>
         private int _topoSize;
@@ -62,18 +44,18 @@ namespace FixedRouteTable
         /// <summary>
         /// Tất cả Router trong mô hình
         /// </summary>
-        private Dictionary<int, Router> allNode;
+        private Dictionary<int, Router> _router;
 
-        public Dictionary<int, Router> AllNode
+        public Dictionary<int, Router> Routers
         {
-            get => allNode;
-            private set => allNode = value;
+            get => _router;
+            private set => _router = value;
         }
 
         private Topology(int topo_size)
         {
             TopologySize = topo_size;
-            CreateAllNode(topo_size);
+            InitAllRouters(topo_size);
         }
 
         /// <summary>
@@ -84,7 +66,7 @@ namespace FixedRouteTable
         /// <param name="cost"></param>
         public void AddRelative(int from, int to, int cost)
         {
-            AllNode[from].RelativeNode(AllNode[to], cost);
+            Routers[from].AddDirectedRouterWithCost(Routers[to], cost);
         }
 
         /// <summary>
@@ -92,11 +74,9 @@ namespace FixedRouteTable
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>
-        public void RemoveRelative(int from,int to)
+        public void RemoveRelative(int from, int to)
         {
-            AllNode[from]
-                    .DirectedRoutersWithCost
-                    .Remove(AllNode[to]);
+            Routers[from].RemoveDirectedRouter(Routers[to]);
         }
 
         /// <summary>
@@ -105,12 +85,9 @@ namespace FixedRouteTable
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="cost"></param>
-        public void UpdateRelative(int from,int to,int cost)
+        public void UpdateRelative(int from, int to, int cost)
         {
-            if(AllNode[from].DirectedRoutersWithCost[AllNode[to]]!=cost)
-            {
-                AllNode[from].DirectedRoutersWithCost[AllNode[to]] = cost;
-            }
+            Routers[from].UpdateCost(Routers[to], cost);
         }
 
         /// <summary>
@@ -119,28 +96,24 @@ namespace FixedRouteTable
         /// <param name="node1"></param>
         /// <param name="node2"></param>
         /// <returns></returns>
-        public bool HasLinkConnect(int node1,int node2)
+        public bool HasLinkConnect(int node1, int node2)
         {
-            return AllNode[node1]
-                    .DirectedRoutersWithCost
-                    .ContainsKey(AllNode[node2])
+            return Routers[node1].HasLinkConnect(Routers[node2])
                     &&
-                    AllNode[node2]
-                    .DirectedRoutersWithCost
-                    .ContainsKey(AllNode[node1]);
+                    Routers[node2].HasLinkConnect(Routers[node1]);
         }
 
         /// <summary>
         /// Khởi tạo tất cả các Node trong mô hình với thông số mặc định
         /// </summary>
-        /// <param name="numNode"></param>
-        private void CreateAllNode(int numNode)
+        /// <param name="topoSize"></param>
+        private void InitAllRouters(int topoSize)
         {
-            AllNode = new Dictionary<int, Router>(numNode);
-            for (int i = 1; i <= numNode; i++)
+            Routers = new Dictionary<int, Router>(topoSize);
+            for (int i = 1; i <= topoSize; i++)
             {
-                Router node = Router.CreateNode(i);
-                AllNode.Add(i, node);
+                Router node = Router.CreateRouter(i);
+                Routers.Add(i, node);
             }
         }
 
@@ -150,25 +123,26 @@ namespace FixedRouteTable
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        public ListOfRoutePath RoutePathLeastCost(int from, int to)
+        private BestRoutePathBase RoutePathLeastCost(int from, int to)
         {
-            ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage(Mode.LeastCost);
-            AllNode[from].PathToFromTopologyLeastCost(pathStorage: ref allPath
-                , destinationNode: AllNode[to]);
-            return allPath;
+            BestRoutePathBase bestPath = LeastCostRoutePath.CreateRoutePathStorage();
+            Routers[from].PathToFromTopology(pathStorage: ref bestPath
+                , destinationNode: Routers[to]);
+            return bestPath;
         }
+
         /// <summary>
         /// Tìm tất cả đường đi từ node "from" tới "to" dựa trên numHop
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        public ListOfRoutePath RoutePathMinimumHop(int from, int to)
+        private BestRoutePathBase RoutePathMinimumHop(int from, int to)
         {
-            ListOfRoutePath allPath = ListOfRoutePath.CreateRoutePathsStorage(Mode.MinimumHop);
-            AllNode[from].PathToFromTopologyMinimumHop(pathStorage: ref allPath
-                , destinationNode: AllNode[to]);
-            return allPath;
+            BestRoutePathBase bestPath = MinimumHopRoutePath.CreateRoutePathStorage();
+            Routers[from].PathToFromTopology(pathStorage: ref bestPath
+                , destinationNode: Routers[to]);
+            return bestPath;
         }
 
         /// <summary>
@@ -178,6 +152,10 @@ namespace FixedRouteTable
         /// <returns></returns>
         public int[,] MetrixCaculate(Mode mode = Mode.LeastCost)
         {
+#if DEBUG
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+#endif
             int[,] metrix = new int[TopologySize, TopologySize];
             metrix.Initialize();
             for (int x = 0; x < TopologySize; x++)
@@ -192,24 +170,28 @@ namespace FixedRouteTable
                         metrix[x, y] = 0;
                         continue;
                     }
-                    ListOfRoutePath listPath;
+                    BestRoutePathBase bestPath;
 
-                    listPath = mode == Mode.LeastCost
-                        ? 
+                    bestPath = mode == Mode.LeastCost
+                        ?
                         RoutePathLeastCost(x_transform, y_transform)
                         :
                         RoutePathMinimumHop(x_transform, y_transform);
 
-                    if (listPath.CantRoute)
+                    if (bestPath.CantRoute)
                     {
                         metrix[x, y] = -1;
                         continue;
                     }
-                    metrix[x, y] = listPath.GetPath().NextHop().HostID;
-                    _routeTable.Add(AllNode[y_transform], AllNode[metrix[x, y]]);
+                    metrix[x, y] = bestPath.GetBestPath().NextHop().HostID;
+                    _routeTable.Add(Routers[y_transform], Routers[metrix[x, y]]);
                 }
-                AllNode[x + 1].ImportRouteTable(_routeTable);
+                Routers[x + 1].ImportRouteTable(_routeTable);
             }
+#if DEBUG
+            stopwatch.Stop();
+            System.Console.WriteLine($"Sync {stopwatch.ElapsedMilliseconds} miliseconds");
+#endif
             return metrix;
         }
 
@@ -221,6 +203,10 @@ namespace FixedRouteTable
         /// <returns></returns>
         public int[,] MetrixCaculateParallel(Mode mode = Mode.LeastCost)
         {
+#if DEBUG
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+#endif
             int[,] metrix = new int[TopologySize, TopologySize];
             metrix.Initialize();
             Parallel.For(0, TopologySize, x =>
@@ -235,24 +221,28 @@ namespace FixedRouteTable
                         metrix[x, y] = 0;
                         return;
                     }
-                    ListOfRoutePath listPath;
+                    BestRoutePathBase bestPath;
 
-                    listPath = mode == Mode.LeastCost
-                        ? 
+                    bestPath = mode == Mode.LeastCost
+                        ?
                         RoutePathLeastCost(x_transform, y_transform)
                         :
                         RoutePathMinimumHop(x_transform, y_transform);
 
-                    if (listPath.CantRoute)
+                    if (bestPath.CantRoute)
                     {
                         metrix[x, y] = -1;
                         return;
                     }
-                    metrix[x, y] = listPath.GetPath().NextHop().HostID;
-                    _routeTable.Add(AllNode[y_transform], AllNode[metrix[x, y]]);
+                    metrix[x, y] = bestPath.GetBestPath().NextHop().HostID;
+                    _routeTable.Add(Routers[y_transform], Routers[metrix[x, y]]);
                 });
-                AllNode[x + 1].ImportRouteTable(_routeTable);
+                Routers[x + 1].ImportRouteTable(_routeTable);
             });
+#if DEBUG
+            stopwatch.Stop();
+            System.Console.WriteLine($"Parallel {stopwatch.ElapsedMilliseconds} miliseconds");
+#endif
             return metrix;
         }
 
@@ -260,9 +250,9 @@ namespace FixedRouteTable
         {
             get
             {
-                if (AllNode.ContainsKey(RID))
+                if (Routers.ContainsKey(RID))
                 {
-                    return AllNode[RID];
+                    return Routers[RID];
                 }
                 else
                 {

@@ -18,7 +18,7 @@ namespace FixedRouteTable
         /// </summary>
         /// <param name="iD"></param>
         /// <returns></returns>
-        public static Router CreateNode(int iD) => new Router(iD);
+        public static Router CreateRouter(int iD) => new Router(iD);
 
         /// <summary>
         /// Danh sách các Router kết nối trực tiếp kết hợp với phí kết nối (Cost)
@@ -44,7 +44,6 @@ namespace FixedRouteTable
         /// Bảng định tuyến
         /// </summary>
         private Dictionary<Router, Router> _routeTable;
-
         public Dictionary<Router, Router> RouteTable
         {
             get => _routeTable;
@@ -59,15 +58,49 @@ namespace FixedRouteTable
         /// <summary>
         /// Thêm phí liên kết giữa Router và các Router kề
         /// </summary>
-        /// <param name="directedNode">Router kề</param>
+        /// <param name="directedRouter">Router kề</param>
         /// <param name="cost">Phí</param>
         /// <returns></returns>
-        public bool RelativeNode(Router directedNode, int cost)
+        public bool AddDirectedRouterWithCost(Router directedRouter, int cost)
         {
-            if (DirectedRoutersWithCost.ContainsKey(directedNode))
+            if (DirectedRoutersWithCost.ContainsKey(directedRouter))
                 return false;
-            DirectedRoutersWithCost.Add(directedNode, cost);
+            DirectedRoutersWithCost.Add(directedRouter, cost);
             return true;
+        }
+
+        /// <summary>
+        /// Gở bỏ kết nối giữa 2 NODE
+        /// </summary>
+        /// <param name="directedRouter"></param>
+        public void RemoveDirectedRouter(Router directedRouter)
+        {
+            DirectedRoutersWithCost
+                    .Remove(directedRouter);
+        }
+
+        /// <summary>
+        /// Cập nhật Cost outgoing
+        /// </summary>
+        /// <param name="directedRouter"></param>
+        /// <param name="cost"></param>
+        public void UpdateCost(Router directedRouter, int cost)
+        {
+            if (DirectedRoutersWithCost[directedRouter] != cost)
+            {
+                DirectedRoutersWithCost[directedRouter] = cost;
+            }
+        }
+
+        /// <summary>
+        /// Check 2 Node có kết nối với nhau không
+        /// </summary>
+        /// <param name="routerLeft"></param>
+        /// <returns></returns>
+        public bool HasLinkConnect(Router routerLeft)
+        {
+            return DirectedRoutersWithCost
+                    .ContainsKey(routerLeft);
         }
 
         /// <summary>
@@ -78,7 +111,7 @@ namespace FixedRouteTable
         /// <param name="destinationNode">Đích đến</param>
         /// <param name="sourceNode">Nguồn</param>
         /// <param name="pathTracking">Đánh dấu đường đi</param>
-        public void PathToFromTopologyLeastCost(ref ListOfRoutePath pathStorage
+        public void PathToFromTopology(ref BestRoutePathBase pathStorage
             , Router destinationNode
             , List<Router> pathTracking = null)
         {
@@ -88,15 +121,14 @@ namespace FixedRouteTable
                 return;
             }
             pathTracking.Add(this);
-            if (pathStorage.GetLeastCostPath() != null 
-                &&RoutePath.CaculateCost(pathTracking)>pathStorage.GetLeastCostPath().Cost)
+            if (pathStorage.BreakCondition(pathTracking))
             {
                 return;
             }
             if (DirectedRoutersWithCost.ContainsKey(destinationNode))
             {
                 pathTracking.Add(destinationNode);
-                pathStorage.Add(RoutePath.CreatePath(pathTracking));
+                pathStorage.CompareAndReplace(RoutePath.CreatePath(pathTracking));
                 return;
             }
             else
@@ -106,56 +138,13 @@ namespace FixedRouteTable
                     );
                 foreach (KeyValuePair<Router, int> item in directedRouter)
                 {
-                    item.Key.PathToFromTopologyLeastCost(pathStorage: ref pathStorage
+                    item.Key.PathToFromTopology(pathStorage: ref pathStorage
                         , destinationNode: destinationNode
                         , pathTracking: pathTracking);
                 }
             }
         }
 
-        /// <summary>
-        /// Tìm tất tuyến đường từ chính Router này đến một Router khác trong 
-        /// Topology chứa nó dựa vào số Hop ít nhất
-        /// </summary>
-        /// <param name="pathStorage">Chứa tất cả các tuyến đường có thể đi</param>
-        /// <param name="destinationNode">Đích đến</param>
-        /// <param name="sourceNode">Nguồn</param>
-        /// <param name="pathTracking">Đánh dấu đường đi</param>
-        public void PathToFromTopologyMinimumHop(ref ListOfRoutePath pathStorage
-            , Router destinationNode
-            , List<Router> pathTracking = null)
-        {
-            pathTracking = (pathTracking ?? new List<Router>()).ToList();
-            if (pathTracking.Exists(o => o.Equals(this)))
-            {
-                return;
-            }
-            pathTracking.Add(this);
-            if (pathStorage.GetMinimunHopPath() != null
-                &&                
-                pathTracking.Count > pathStorage.GetMinimunHopPath().NumHop)
-            {
-                return;
-            }
-            if (DirectedRoutersWithCost.ContainsKey(destinationNode))
-            {
-                pathTracking.Add(destinationNode);
-                pathStorage.Add(RoutePath.CreatePath(pathTracking));
-                return;
-            }
-            else
-            {
-                var directedRouter = DirectedRoutersWithCost
-                    .Where(co => !pathTracking.Exists(po => po.Equals(co.Key))
-                    );
-                foreach (KeyValuePair<Router, int> item in directedRouter)
-                {
-                    item.Key.PathToFromTopologyMinimumHop(pathStorage: ref pathStorage
-                        , destinationNode: destinationNode
-                        , pathTracking: pathTracking);
-                }
-            }
-        }
         /// <summary>
         /// Tìm đường đi dựa vào database
         /// </summary>

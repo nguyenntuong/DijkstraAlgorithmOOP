@@ -29,31 +29,31 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.txtTopoSize = new System.Windows.Forms.TextBox();
+            this.grbFeatures = new System.Windows.Forms.GroupBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.grbRelativeInput = new System.Windows.Forms.GroupBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.btnAddRelative = new System.Windows.Forms.Button();
+            this.txtCost_right = new System.Windows.Forms.TextBox();
+            this.txtCost_left = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cbbRightNodes = new System.Windows.Forms.ComboBox();
+            this.cbbLeftNodes = new System.Windows.Forms.ComboBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.btnBegin = new System.Windows.Forms.Button();
+            this.txtTopoSize = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.grbDetails = new System.Windows.Forms.GroupBox();
             this.lstTopoNodes = new System.Windows.Forms.ListBox();
-            this.grbRelativeInput = new System.Windows.Forms.GroupBox();
-            this.cbbLeftNodes = new System.Windows.Forms.ComboBox();
-            this.cbbRightNodes = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.txtCost_left = new System.Windows.Forms.TextBox();
-            this.btnAddRelative = new System.Windows.Forms.Button();
-            this.grbFeatures = new System.Windows.Forms.GroupBox();
-            this.button3 = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.txtCost_right = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
-            this.grbDetails.SuspendLayout();
-            this.grbRelativeInput.SuspendLayout();
             this.grbFeatures.SuspendLayout();
+            this.grbRelativeInput.SuspendLayout();
+            this.grbDetails.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -70,6 +70,187 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Dữ liệu cơ bản";
             // 
+            // grbFeatures
+            // 
+            this.grbFeatures.Controls.Add(this.button1);
+            this.grbFeatures.Controls.Add(this.button3);
+            this.grbFeatures.Location = new System.Drawing.Point(7, 296);
+            this.grbFeatures.Name = "grbFeatures";
+            this.grbFeatures.Size = new System.Drawing.Size(334, 113);
+            this.grbFeatures.TabIndex = 3;
+            this.grbFeatures.TabStop = false;
+            this.grbFeatures.Text = "Chức năng";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(223, 48);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(105, 23);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Huỷ bỏ tác vụ";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(223, 19);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(105, 23);
+            this.button3.TabIndex = 0;
+            this.button3.Text = "Kết thúc";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // grbRelativeInput
+            // 
+            this.grbRelativeInput.Controls.Add(this.label7);
+            this.grbRelativeInput.Controls.Add(this.label6);
+            this.grbRelativeInput.Controls.Add(this.btnAddRelative);
+            this.grbRelativeInput.Controls.Add(this.txtCost_right);
+            this.grbRelativeInput.Controls.Add(this.txtCost_left);
+            this.grbRelativeInput.Controls.Add(this.label8);
+            this.grbRelativeInput.Controls.Add(this.label4);
+            this.grbRelativeInput.Controls.Add(this.label3);
+            this.grbRelativeInput.Controls.Add(this.label2);
+            this.grbRelativeInput.Controls.Add(this.cbbRightNodes);
+            this.grbRelativeInput.Controls.Add(this.cbbLeftNodes);
+            this.grbRelativeInput.Controls.Add(this.label5);
+            this.grbRelativeInput.Enabled = false;
+            this.grbRelativeInput.Location = new System.Drawing.Point(7, 70);
+            this.grbRelativeInput.Name = "grbRelativeInput";
+            this.grbRelativeInput.Size = new System.Drawing.Size(334, 220);
+            this.grbRelativeInput.TabIndex = 1;
+            this.grbRelativeInput.TabStop = false;
+            this.grbRelativeInput.Text = "Nhập quan hệ giữa các NODE";
+            // 
+            // label7
+            // 
+            this.label7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            this.label7.Location = new System.Drawing.Point(7, 44);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(321, 38);
+            this.label7.TabIndex = 7;
+            this.label7.Text = "* Cost = 0 thể hiện cho cùng một NODE ( dữ liệu này tự sinh có thể bỏ qua )";
+            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label6
+            // 
+            this.label6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            this.label6.Location = new System.Drawing.Point(7, 20);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(321, 19);
+            this.label6.TabIndex = 7;
+            this.label6.Text = "* Các NODE không kết nối với nhau Cost = -1 ( không cần nhập )";
+            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btnAddRelative
+            // 
+            this.btnAddRelative.Location = new System.Drawing.Point(87, 187);
+            this.btnAddRelative.Name = "btnAddRelative";
+            this.btnAddRelative.Size = new System.Drawing.Size(130, 23);
+            this.btnAddRelative.TabIndex = 2;
+            this.btnAddRelative.Text = "Thêm quan hệ";
+            this.btnAddRelative.UseVisualStyleBackColor = true;
+            this.btnAddRelative.Click += new System.EventHandler(this.btnAddRelative_Click);
+            // 
+            // txtCost_right
+            // 
+            this.txtCost_right.Location = new System.Drawing.Point(182, 160);
+            this.txtCost_right.Name = "txtCost_right";
+            this.txtCost_right.Size = new System.Drawing.Size(121, 20);
+            this.txtCost_right.TabIndex = 1;
+            this.txtCost_right.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // txtCost_left
+            // 
+            this.txtCost_left.Location = new System.Drawing.Point(7, 160);
+            this.txtCost_left.Name = "txtCost_left";
+            this.txtCost_left.Size = new System.Drawing.Size(121, 20);
+            this.txtCost_left.TabIndex = 0;
+            this.txtCost_left.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label8
+            // 
+            this.label8.Location = new System.Drawing.Point(220, 136);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(42, 21);
+            this.label8.TabIndex = 2;
+            this.label8.Text = "<----";
+            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label4
+            // 
+            this.label4.Location = new System.Drawing.Point(43, 138);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(42, 21);
+            this.label4.TabIndex = 2;
+            this.label4.Text = "---->";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(259, 94);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(41, 13);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "NODE:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(7, 94);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(41, 13);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "NODE:";
+            // 
+            // cbbRightNodes
+            // 
+            this.cbbRightNodes.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.cbbRightNodes.FormattingEnabled = true;
+            this.cbbRightNodes.Location = new System.Drawing.Point(182, 112);
+            this.cbbRightNodes.Name = "cbbRightNodes";
+            this.cbbRightNodes.Size = new System.Drawing.Size(121, 21);
+            this.cbbRightNodes.TabIndex = 0;
+            this.cbbRightNodes.SelectedIndexChanged += new System.EventHandler(this.cbbDirectedNodes_SelectedIndexChanged);
+            // 
+            // cbbLeftNodes
+            // 
+            this.cbbLeftNodes.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.cbbLeftNodes.FormattingEnabled = true;
+            this.cbbLeftNodes.Location = new System.Drawing.Point(7, 112);
+            this.cbbLeftNodes.Name = "cbbLeftNodes";
+            this.cbbLeftNodes.Size = new System.Drawing.Size(121, 21);
+            this.cbbLeftNodes.TabIndex = 0;
+            this.cbbLeftNodes.SelectedIndexChanged += new System.EventHandler(this.cbbCurrentNodes_SelectedIndexChanged);
+            // 
+            // label5
+            // 
+            this.label5.Location = new System.Drawing.Point(14, 161);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(286, 19);
+            this.label5.TabIndex = 3;
+            this.label5.Text = "COST";
+            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // btnBegin
+            // 
+            this.btnBegin.Location = new System.Drawing.Point(230, 29);
+            this.btnBegin.Name = "btnBegin";
+            this.btnBegin.Size = new System.Drawing.Size(111, 23);
+            this.btnBegin.TabIndex = 1;
+            this.btnBegin.Text = "Bắt đầu";
+            this.btnBegin.UseVisualStyleBackColor = true;
+            this.btnBegin.Click += new System.EventHandler(this.btnBegin_Click);
+            // 
+            // txtTopoSize
+            // 
+            this.txtTopoSize.Location = new System.Drawing.Point(83, 31);
+            this.txtTopoSize.Name = "txtTopoSize";
+            this.txtTopoSize.Size = new System.Drawing.Size(141, 20);
+            this.txtTopoSize.TabIndex = 0;
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -78,23 +259,6 @@
             this.label1.Size = new System.Drawing.Size(52, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "Số Node:";
-            // 
-            // txtTopoSize
-            // 
-            this.txtTopoSize.Location = new System.Drawing.Point(83, 31);
-            this.txtTopoSize.Name = "txtTopoSize";
-            this.txtTopoSize.Size = new System.Drawing.Size(141, 20);
-            this.txtTopoSize.TabIndex = 1;
-            // 
-            // btnBegin
-            // 
-            this.btnBegin.Location = new System.Drawing.Point(230, 29);
-            this.btnBegin.Name = "btnBegin";
-            this.btnBegin.Size = new System.Drawing.Size(111, 23);
-            this.btnBegin.TabIndex = 2;
-            this.btnBegin.Text = "Bắt đầu";
-            this.btnBegin.UseVisualStyleBackColor = true;
-            this.btnBegin.Click += new System.EventHandler(this.btnBegin_Click);
             // 
             // grbDetails
             // 
@@ -115,168 +279,6 @@
             this.lstTopoNodes.Size = new System.Drawing.Size(416, 406);
             this.lstTopoNodes.TabIndex = 0;
             // 
-            // grbRelativeInput
-            // 
-            this.grbRelativeInput.Controls.Add(this.label7);
-            this.grbRelativeInput.Controls.Add(this.label6);
-            this.grbRelativeInput.Controls.Add(this.btnAddRelative);
-            this.grbRelativeInput.Controls.Add(this.txtCost_right);
-            this.grbRelativeInput.Controls.Add(this.txtCost_left);
-            this.grbRelativeInput.Controls.Add(this.label8);
-            this.grbRelativeInput.Controls.Add(this.label4);
-            this.grbRelativeInput.Controls.Add(this.label3);
-            this.grbRelativeInput.Controls.Add(this.label2);
-            this.grbRelativeInput.Controls.Add(this.cbbRightNodes);
-            this.grbRelativeInput.Controls.Add(this.cbbLeftNodes);
-            this.grbRelativeInput.Controls.Add(this.label5);
-            this.grbRelativeInput.Enabled = false;
-            this.grbRelativeInput.Location = new System.Drawing.Point(7, 70);
-            this.grbRelativeInput.Name = "grbRelativeInput";
-            this.grbRelativeInput.Size = new System.Drawing.Size(334, 220);
-            this.grbRelativeInput.TabIndex = 3;
-            this.grbRelativeInput.TabStop = false;
-            this.grbRelativeInput.Text = "Nhập quan hệ giữa các NODE";
-            // 
-            // cbbLeftNodes
-            // 
-            this.cbbLeftNodes.FormattingEnabled = true;
-            this.cbbLeftNodes.Location = new System.Drawing.Point(7, 112);
-            this.cbbLeftNodes.Name = "cbbLeftNodes";
-            this.cbbLeftNodes.Size = new System.Drawing.Size(121, 21);
-            this.cbbLeftNodes.TabIndex = 0;
-            this.cbbLeftNodes.SelectedIndexChanged += new System.EventHandler(this.cbbCurrentNodes_SelectedIndexChanged);
-            // 
-            // cbbRightNodes
-            // 
-            this.cbbRightNodes.FormattingEnabled = true;
-            this.cbbRightNodes.Location = new System.Drawing.Point(182, 112);
-            this.cbbRightNodes.Name = "cbbRightNodes";
-            this.cbbRightNodes.Size = new System.Drawing.Size(121, 21);
-            this.cbbRightNodes.TabIndex = 0;
-            this.cbbRightNodes.SelectedIndexChanged += new System.EventHandler(this.cbbDirectedNodes_SelectedIndexChanged);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 94);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(41, 13);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "NODE:";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(259, 94);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(41, 13);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "NODE:";
-            // 
-            // label4
-            // 
-            this.label4.Location = new System.Drawing.Point(43, 138);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(42, 21);
-            this.label4.TabIndex = 2;
-            this.label4.Text = "---->";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label5
-            // 
-            this.label5.Location = new System.Drawing.Point(14, 161);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(286, 19);
-            this.label5.TabIndex = 3;
-            this.label5.Text = "COST";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // txtCost_left
-            // 
-            this.txtCost_left.Location = new System.Drawing.Point(7, 160);
-            this.txtCost_left.Name = "txtCost_left";
-            this.txtCost_left.Size = new System.Drawing.Size(121, 20);
-            this.txtCost_left.TabIndex = 4;
-            this.txtCost_left.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // btnAddRelative
-            // 
-            this.btnAddRelative.Location = new System.Drawing.Point(87, 187);
-            this.btnAddRelative.Name = "btnAddRelative";
-            this.btnAddRelative.Size = new System.Drawing.Size(130, 23);
-            this.btnAddRelative.TabIndex = 5;
-            this.btnAddRelative.Text = "Thêm quan hệ";
-            this.btnAddRelative.UseVisualStyleBackColor = true;
-            this.btnAddRelative.Click += new System.EventHandler(this.btnAddRelative_Click);
-            // 
-            // grbFeatures
-            // 
-            this.grbFeatures.Controls.Add(this.button1);
-            this.grbFeatures.Controls.Add(this.button3);
-            this.grbFeatures.Location = new System.Drawing.Point(7, 296);
-            this.grbFeatures.Name = "grbFeatures";
-            this.grbFeatures.Size = new System.Drawing.Size(334, 113);
-            this.grbFeatures.TabIndex = 4;
-            this.grbFeatures.TabStop = false;
-            this.grbFeatures.Text = "Chức năng";
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(223, 19);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(105, 23);
-            this.button3.TabIndex = 6;
-            this.button3.Text = "Kết thúc";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
-            // 
-            // label6
-            // 
-            this.label6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
-            this.label6.Location = new System.Drawing.Point(7, 20);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(321, 19);
-            this.label6.TabIndex = 7;
-            this.label6.Text = "* Các NODE không kết nối với nhau Cost = -1 ( không cần nhập )";
-            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label7
-            // 
-            this.label7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
-            this.label7.Location = new System.Drawing.Point(7, 44);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(321, 38);
-            this.label7.TabIndex = 7;
-            this.label7.Text = "* Cost = 0 thể hiện cho cùng một NODE ( dữ liệu này tự sinh có thể bỏ qua )";
-            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // txtCost_right
-            // 
-            this.txtCost_right.Location = new System.Drawing.Point(182, 160);
-            this.txtCost_right.Name = "txtCost_right";
-            this.txtCost_right.Size = new System.Drawing.Size(121, 20);
-            this.txtCost_right.TabIndex = 4;
-            this.txtCost_right.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // label8
-            // 
-            this.label8.Location = new System.Drawing.Point(220, 136);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(42, 21);
-            this.label8.TabIndex = 2;
-            this.label8.Text = "<----";
-            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(223, 48);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(105, 23);
-            this.button1.TabIndex = 6;
-            this.button1.Text = "Huỷ bỏ tác vụ";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // frmMutualInput
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -296,10 +298,10 @@
             this.Load += new System.EventHandler(this.frmMutualInput_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.grbDetails.ResumeLayout(false);
+            this.grbFeatures.ResumeLayout(false);
             this.grbRelativeInput.ResumeLayout(false);
             this.grbRelativeInput.PerformLayout();
-            this.grbFeatures.ResumeLayout(false);
+            this.grbDetails.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

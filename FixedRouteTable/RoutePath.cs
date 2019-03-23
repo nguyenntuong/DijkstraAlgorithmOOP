@@ -19,7 +19,6 @@ namespace FixedRouteTable
         /// Đường đi
         /// </summary>
         private List<Router> _path;
-
         public List<Router> Path
         {
             get => _path;
@@ -30,7 +29,6 @@ namespace FixedRouteTable
         /// Tổng phí của đường này
         /// </summary>
         private int _cost = 0;
-
         public int Cost
         {
             get => _cost;
@@ -47,8 +45,7 @@ namespace FixedRouteTable
         /// </summary>
         public bool IsValid => Path.Count > 1;
         public bool IsNotValid => Path.Count < 2;
-
-
+        
         private RoutePath(List<Router> path)
         {
             Path = path;
@@ -62,6 +59,9 @@ namespace FixedRouteTable
                 Cost += Path[i - 1].DirectedRoutersWithCost[Path[i]];
             }
         }
+
+        public Router NextHop() => IsNotValid ? null : Path[1];
+
         static public int CaculateCost(List<Router> path)
         {
             int cost = 0;
@@ -71,7 +71,5 @@ namespace FixedRouteTable
             }
             return cost;
         }
-
-        public Router NextHop() => IsNotValid ? null : Path[1];
     }
 }

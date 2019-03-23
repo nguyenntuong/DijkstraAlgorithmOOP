@@ -49,14 +49,19 @@ namespace FixedRouteTable
         }
         private void InitUI()
         {
-            cbbLeftNodes.Items.AddRange(topology.AllNode.Select((o) => (object)o.Key).ToArray());
-            cbbRightNodes.Items.AddRange(topology.AllNode.Select((o) => (object)o.Key).ToArray());
+            cbbLeftNodes.Items.AddRange(topology.Routers.Select((o) => (object)o.Key).ToArray());
+            cbbRightNodes.Items.AddRange(topology.Routers.Select((o) => (object)o.Key).ToArray());
             cbbLeftNodes.SelectedIndex = 0;
             cbbRightNodes.SelectedIndex = 0;
         }
 
         private void btnAddRelative_Click(object sender, EventArgs e)
         {
+            if (cbbLeftNodes.SelectedItem == null || cbbRightNodes.SelectedItem == null)
+            {
+                MessageBox.Show($"Router không tồn tại !","Cảnh báo !");
+                return;
+            }
             CheckSameNode();
             if (!int.TryParse(txtCost_left.Text, out int leftCost))
             {
@@ -75,9 +80,9 @@ namespace FixedRouteTable
                 return;
             }
 
-            if(leftCost <0 && rightCost <0)
+            if (leftCost < 0 && rightCost < 0)
             {
-                if (topology.HasLinkConnect((int)cbbLeftNodes.SelectedItem,(int)cbbRightNodes.SelectedItem))
+                if (topology.HasLinkConnect((int)cbbLeftNodes.SelectedItem, (int)cbbRightNodes.SelectedItem))
                 {
                     if (MessageBox.Show($"Node {(int)cbbLeftNodes.SelectedItem} " +
                         $" đã có kết nối với Node {(int)cbbRightNodes.SelectedItem}." +
@@ -110,7 +115,7 @@ namespace FixedRouteTable
                     topology.UpdateRelative((int)cbbRightNodes.SelectedItem
                         , (int)cbbLeftNodes.SelectedItem
                         , rightCost);
-                    
+
                 }
                 else
                 {
@@ -128,7 +133,7 @@ namespace FixedRouteTable
         private void ReDrawListNodeDetails()
         {
             lstTopoNodes.Items.Clear();
-            lstTopoNodes.Items.AddRange(topology.AllNode.Values.ToArray());
+            lstTopoNodes.Items.AddRange(topology.Routers.Values.ToArray());
         }
         private void button3_Click(object sender, EventArgs e)
         {
