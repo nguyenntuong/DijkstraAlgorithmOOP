@@ -6,7 +6,7 @@ namespace FixedRouteTable
     {
         /// <summary>
         /// Danh sách tất cả các tuyến đường đi được
-        /// điều kiện MinimumHop
+        /// điều kiện
         /// </summary>
         private RoutePath _bestRoutePath = null;
 
