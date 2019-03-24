@@ -248,7 +248,8 @@ namespace FixedRouteTable
                 };
                 for (int y = 0; y < routeMetrix.GetLength(1); y++)
                 {
-                    intl.Add(routeMetrix.GetValue(y, x));
+                    int nhop = (int)routeMetrix.GetValue(y, x);
+                    intl.Add(nhop==0?"=":nhop.ToString());
                 }
                 dataGridView1.Rows.Add(intl.ToArray());
             }
