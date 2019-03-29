@@ -86,10 +86,12 @@ namespace FixedRouteTable
                         {
                             if (Topology == null)
                             {
+                                button2.Text = "Nhập thủ công";
                                 gBFunction.Enabled = false;
                             }
                             else
                             {
+                                button2.Text = "Chỉnh sữa mô hình";
                                 gBFunction.Enabled = true;
                             }
                         })));
@@ -98,10 +100,12 @@ namespace FixedRouteTable
                 {
                     if (Topology == null)
                     {
+                        button2.Text = "Nhập thủ công";
                         gBFunction.Enabled = false;
                     }
                     else
                     {
+                        button2.Text = "Chỉnh sữa mô hình";
                         gBFunction.Enabled = true;
                     }
                 }
@@ -679,10 +683,20 @@ namespace FixedRouteTable
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Form frmInput = new frmMutualInput();
-            frmInput.Owner = this;
-            frmInput.FormClosing += FrmInput_FormClosing;
-            frmInput.Show();
+            if (Topology == null)
+            {
+                Form frmInput = new frmMutualInput();
+                frmInput.Owner = this;
+                frmInput.FormClosing += FrmInput_FormClosing;
+                frmInput.Show();
+            }
+            else
+            {
+                Form frmInput = new frmMutualInput(Topology);
+                frmInput.Owner = this;
+                frmInput.FormClosing += FrmInput_FormClosing;
+                frmInput.Show();
+            }
         }
 
         private void FrmInput_FormClosing(object sender, FormClosingEventArgs e)

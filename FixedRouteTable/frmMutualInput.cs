@@ -12,6 +12,11 @@ namespace FixedRouteTable
             InitializeComponent();
         }
 
+        public frmMutualInput(Topology hostTopology) : this()
+        {
+            topology = hostTopology;
+        }
+
         #region Var
         private int TopoSize = 0;
 
@@ -20,6 +25,8 @@ namespace FixedRouteTable
         private void frmMutualInput_Load(object sender, EventArgs e)
         {
             Owner.Enabled = false;
+            ClearUI();
+            InitUI();
         }
 
         private void frmMutualInput_FormClosing(object sender, FormClosingEventArgs e)
@@ -34,7 +41,6 @@ namespace FixedRouteTable
                 MessageBox.Show("Số lượng Node phải là một số nguyên, và phải lớn hơn 2 !", "Nhập liệu sai !");
                 return;
             }
-            grbRelativeInput.Enabled = true;
             topology = Topology.CreateTopology(TopoSize);
             ClearUI();
             InitUI();
@@ -49,17 +55,31 @@ namespace FixedRouteTable
         }
         private void InitUI()
         {
-            cbbLeftNodes.Items.AddRange(topology.Routers.Select((o) => (object)o.Key).ToArray());
-            cbbRightNodes.Items.AddRange(topology.Routers.Select((o) => (object)o.Key).ToArray());
-            cbbLeftNodes.SelectedIndex = 0;
-            cbbRightNodes.SelectedIndex = 0;
+            if (topology == null)
+            {
+                groupBox2.Enabled = true;
+                grbRelativeInput.Enabled = false;
+            }
+            else
+            {
+                groupBox2.Enabled = false;
+                grbRelativeInput.Enabled = true;
+                if (TopoSize != topology.TopologySize)
+                    TopoSize = topology.TopologySize;
+                txtTopoSize.Text = TopoSize.ToString();
+                cbbLeftNodes.Items.AddRange(topology.Routers.Select((o) => (object)o.Key).ToArray());
+                cbbRightNodes.Items.AddRange(topology.Routers.Select((o) => (object)o.Key).ToArray());
+                cbbLeftNodes.SelectedIndex = 0;
+                cbbRightNodes.SelectedIndex = 0;
+                ReDrawListNodeDetails();
+            }
         }
 
         private void btnAddRelative_Click(object sender, EventArgs e)
         {
             if (cbbLeftNodes.SelectedItem == null || cbbRightNodes.SelectedItem == null)
             {
-                MessageBox.Show($"Router không tồn tại !","Cảnh báo !");
+                MessageBox.Show($"Router không tồn tại !", "Cảnh báo !");
                 return;
             }
             CheckSameNode();
@@ -147,20 +167,42 @@ namespace FixedRouteTable
 
         private void cbbCurrentNodes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            CheckSameNode();
+            CheckNodeLinked();
         }
 
         private void cbbDirectedNodes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            CheckSameNode();
+            CheckNodeLinked();
         }
 
+        private void CheckNodeLinked()
+        {
+            if (cbbLeftNodes.SelectedItem != null && cbbRightNodes.SelectedItem != null)
+            {
+                int ln = (int)cbbLeftNodes.SelectedItem;
+                int rn = (int)cbbRightNodes.SelectedItem;
+                if( ln==rn )
+                    txtCost_left.Text = txtCost_right.Text = 0.ToString();
+                else if (topology[ln].HasLinkConnect(topology[rn]))
+                {
+                    txtCost_left.Text=topology[ln].DirectedRoutersWithCost[topology[rn]].ToString();
+                    txtCost_right.Text = topology[rn].DirectedRoutersWithCost[topology[ln]].ToString();
+                }
+                else
+                {
+                    txtCost_left.Text = txtCost_right.Text = "";
+                }
+            }            
+        }
         private void CheckSameNode()
         {
-            if (cbbLeftNodes.SelectedItem != null && cbbRightNodes.SelectedItem != null && (int)cbbLeftNodes.SelectedItem == (int)cbbRightNodes.SelectedItem)
+            if (cbbLeftNodes.SelectedItem != null && cbbRightNodes.SelectedItem != null)
             {
-                txtCost_left.Text = txtCost_right.Text = 0.ToString();
-            }
+                int ln = (int)cbbLeftNodes.SelectedItem;
+                int rn = (int)cbbRightNodes.SelectedItem;
+                if( ln==rn )
+                    txtCost_left.Text = txtCost_right.Text = 0.ToString();                
+            }            
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -170,6 +212,17 @@ namespace FixedRouteTable
                 return;
             }
             Close();
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Xác nhận xoá mô hình đang nhập và nhập lại !", "Xác nhận !") != DialogResult.OK)
+            {
+                return;
+            }
+            topology = null;
+            ClearUI();
+            InitUI();
         }
     }
 }

@@ -50,19 +50,20 @@
             this.label1 = new System.Windows.Forms.Label();
             this.grbDetails = new System.Windows.Forms.GroupBox();
             this.lstTopoNodes = new System.Windows.Forms.ListBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox1.SuspendLayout();
             this.grbFeatures.SuspendLayout();
             this.grbRelativeInput.SuspendLayout();
             this.grbDetails.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.groupBox2);
             this.groupBox1.Controls.Add(this.grbFeatures);
             this.groupBox1.Controls.Add(this.grbRelativeInput);
-            this.groupBox1.Controls.Add(this.btnBegin);
-            this.groupBox1.Controls.Add(this.txtTopoSize);
-            this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(13, 13);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(347, 425);
@@ -72,6 +73,7 @@
             // 
             // grbFeatures
             // 
+            this.grbFeatures.Controls.Add(this.button2);
             this.grbFeatures.Controls.Add(this.button1);
             this.grbFeatures.Controls.Add(this.button3);
             this.grbFeatures.Location = new System.Drawing.Point(7, 296);
@@ -83,17 +85,17 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(223, 48);
+            this.button1.Location = new System.Drawing.Point(117, 33);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(105, 23);
             this.button1.TabIndex = 1;
-            this.button1.Text = "Huỷ bỏ tác vụ";
+            this.button1.Text = "Làm mới mô hình";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(223, 19);
+            this.button3.Location = new System.Drawing.Point(6, 33);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(105, 23);
             this.button3.TabIndex = 0;
@@ -236,7 +238,7 @@
             // 
             // btnBegin
             // 
-            this.btnBegin.Location = new System.Drawing.Point(230, 29);
+            this.btnBegin.Location = new System.Drawing.Point(217, 19);
             this.btnBegin.Name = "btnBegin";
             this.btnBegin.Size = new System.Drawing.Size(111, 23);
             this.btnBegin.TabIndex = 1;
@@ -246,7 +248,7 @@
             // 
             // txtTopoSize
             // 
-            this.txtTopoSize.Location = new System.Drawing.Point(83, 31);
+            this.txtTopoSize.Location = new System.Drawing.Point(70, 21);
             this.txtTopoSize.Name = "txtTopoSize";
             this.txtTopoSize.Size = new System.Drawing.Size(141, 20);
             this.txtTopoSize.TabIndex = 0;
@@ -254,7 +256,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(25, 34);
+            this.label1.Location = new System.Drawing.Point(12, 24);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(52, 13);
             this.label1.TabIndex = 0;
@@ -279,6 +281,28 @@
             this.lstTopoNodes.Size = new System.Drawing.Size(416, 406);
             this.lstTopoNodes.TabIndex = 0;
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(223, 84);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(105, 23);
+            this.button2.TabIndex = 1;
+            this.button2.Text = "Huỷ bỏ tác vụ";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.btnBegin);
+            this.groupBox2.Controls.Add(this.label1);
+            this.groupBox2.Controls.Add(this.txtTopoSize);
+            this.groupBox2.Location = new System.Drawing.Point(7, 16);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(334, 48);
+            this.groupBox2.TabIndex = 4;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Số lượng Node:";
+            // 
             // frmMutualInput
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -297,11 +321,12 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMutualInput_FormClosing);
             this.Load += new System.EventHandler(this.frmMutualInput_Load);
             this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.grbFeatures.ResumeLayout(false);
             this.grbRelativeInput.ResumeLayout(false);
             this.grbRelativeInput.PerformLayout();
             this.grbDetails.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -330,5 +355,7 @@
         private System.Windows.Forms.TextBox txtCost_right;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.GroupBox groupBox2;
     }
 }
