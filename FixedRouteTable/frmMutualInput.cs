@@ -207,7 +207,7 @@ namespace FixedRouteTable
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Xác nhận huỷ tác tụ và quay về trang chủ !", "Xác nhận !") != DialogResult.OK)
+            if (MessageBox.Show("Xác nhận huỷ tác vụ và quay về trang chủ !", "Xác nhận !") != DialogResult.OK)
             {
                 return;
             }
